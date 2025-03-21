@@ -35,6 +35,7 @@
             <input type="file" class="form-control" id="icon" name="icon">
             @if ($category->icon)
                 <div class="mt-2">
+                    {{-- <img src="{{ asset(($category->icon)) }}" alt="Category Icon" width="100" height="100"> for live --}}
                     <img src="{{ '/uploads/category/' . basename($category->icon) }}" alt="Category Icon" width="100" height="100">
                 </div>
             @endif

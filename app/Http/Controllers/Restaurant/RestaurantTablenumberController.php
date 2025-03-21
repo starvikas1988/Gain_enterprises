@@ -33,12 +33,12 @@ class RestaurantTablenumberController extends Controller
         // Paginate with 10 results per page
         $tables = $query->paginate(10);
 
-        return view('restaurant.tables.index', compact('tables'));
+        return view('Restaurant.tables.index', compact('tables'));
     }
 
     public function create()
     {
-        return view('restaurant.tables.create');
+        return view('Restaurant.tables.create');
     }
 
     public function store(Request $request)
@@ -63,7 +63,7 @@ class RestaurantTablenumberController extends Controller
     public function edit($id)
     {
         $table = RestaurantTablenumber::where('restaurant_id', Auth::id())->findOrFail($id);
-        return view('restaurant.tables.edit', compact('table'));
+        return view('Restaurant.tables.edit', compact('table'));
     }
 
     public function update(Request $request, $id)

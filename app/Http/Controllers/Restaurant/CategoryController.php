@@ -22,12 +22,12 @@ class CategoryController extends Controller
         }
 
         $categories = $query->paginate(10);
-        return view('restaurant.categories.index', compact('categories'));
+        return view('Restaurant.categories.index', compact('categories'));
     }
 
     public function create()
     {
-        return view('restaurant.categories.create');
+        return view('Restaurant.categories.create');
     }
 
     public function store(Request $request)
@@ -63,7 +63,7 @@ class CategoryController extends Controller
     public function edit($id)
     {
         $category = Category::where('restaurant_id', Auth::id())->findOrFail($id);
-        return view('restaurant.categories.edit', compact('category'));
+        return view('Restaurant.categories.edit', compact('category'));
     }
 
     public function update(Request $request, $id)

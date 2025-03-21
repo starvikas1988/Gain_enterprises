@@ -51,7 +51,7 @@
                     <ul class="side-nav-second-level">
                         <li><a href="{{ route('restaurant.tables.index') }}"><i class="uil-arrow-right"></i>Manage Tables</a></li>
                         <li><a href="{{route('restaurant.categories.index')}}"><i class="uil-arrow-right"></i> Manage Category</a></li>
-                        <li><a href="{{url('restaurant/menu/add')}}"><i class="uil-arrow-right"></i> Add Item</a></li>
+                        <li><a href="{{route('restaurant.products.index')}}"><i class="uil-arrow-right"></i> Manage Products</a></li>
                     </ul>
                 </div>
             </li>
