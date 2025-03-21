@@ -56,9 +56,6 @@
                 </tr>
             </thead>
             
-            {{-- {{ dd(env('APP_URL'), env('ASSET_URL'), config('app.url'), config('app.asset_url')); }} --}}
-            
-
             <tbody>
                 @forelse ($categories as $category)
                
