@@ -4,8 +4,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Restaurant\KotController;
 use App\Http\Controllers\Restaurant\OrderController;
-use App\Http\Controllers\Restaurant\RestaurantTablenumberController;
+use App\Http\Controllers\Restaurant\StockController;
+use App\Http\Controllers\Restaurant\ProductController;
 use App\Http\Controllers\Restaurant\CategoryController;
+use App\Http\Controllers\Restaurant\RestaurantTablenumberController;
 
 /*
 |--------------------------------------------------------------------------
@@ -156,7 +158,28 @@ Route::prefix('restaurant')->group(function () {
             'update' => 'restaurant.categories.update',
             'destroy' => 'restaurant.categories.destroy',
         ]);
-        
+
+        Route::resource('/products', ProductController::class)
+        ->names([
+            'index' => 'restaurant.products.index',
+            'create' => 'restaurant.products.create',
+            'store' => 'restaurant.products.store',
+            'show' => 'restaurant.products.show',
+            'edit' => 'restaurant.products.edit',
+            'update' => 'restaurant.products.update',
+            'destroy' => 'restaurant.products.destroy',
+        ]);
+
+        Route::resource('/stocks', App\Http\Controllers\Restaurant\StockController::class)
+        ->names([
+            'index' => 'restaurant.stocks.index',
+        ]);
+
+        Route::post('/restaurant/stocks/uploadBulk', [StockController::class, 'uploadBulk'])->name('restaurant.stocks.uploadBulk');
+        Route::post('/restaurant/stocks/updateBulk', [StockController::class, 'updateBulk'])->name('restaurant.stocks.updateBulk');
+        Route::delete('/restaurant/stocks/{id}', [StockController::class, 'destroy'])->name('restaurant.stocks.destroy');
+        Route::get('/restaurant/stocks/downloadSample', [StockController::class, 'downloadSample'])->name('restaurant.stocks.downloadSample');
+
 
 
         

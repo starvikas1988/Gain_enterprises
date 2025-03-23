@@ -11,11 +11,24 @@ class Product extends Model
     
     use HasFactory, SoftDeletes;
     
-    protected $fillable = ['name', 'icon', 'status', 'restaurant_id'];
+    protected $fillable = [
+        'name',
+        'category_id',
+        'price',
+        'image',
+        'description',
+        'is_recommend',
+        'status'
+    ];
     
     public function getImageAttribute($value)
     {
         return 'https://caterer.gainenterprises.in/backend/' . $value;
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     

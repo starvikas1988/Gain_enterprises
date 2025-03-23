@@ -56,9 +56,6 @@
                 </tr>
             </thead>
             
-            
-            
-
             <tbody>
                 <?php $__empty_1 = true; $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                
@@ -67,8 +64,8 @@
                         <td><?php echo e($category->name); ?></td>
                         <td>
                             <?php if($category->icon): ?>
-                                <img src="<?php echo e(asset($category->icon)); ?>" alt="icon" width="50" height="50">
-                                
+                                 
+                                <img src="<?php echo e('/uploads/category/' . basename($category->icon)); ?>" alt="icon" width="50" height="50">
 
                             <?php else: ?>
                                 N/A
