@@ -12,6 +12,11 @@ class StockImport implements ToModel, WithHeadingRow
 {
     public function model(array $row)
     {
+        // Ensure required fields exist and ignore unnecessary columns
+        if (!isset($row['category_id'], $row['product_id'], $row['default_stock'], $row['todays_stock'])) {
+            throw new \Exception("Missing required fields in Row: " . json_encode($row));
+        }
+
         // Validate category_id and product_id existence
         $category = Category::find($row['category_id']);
         $product = Product::find($row['product_id']);

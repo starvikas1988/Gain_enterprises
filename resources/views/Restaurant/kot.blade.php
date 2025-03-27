@@ -191,6 +191,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div id="modalMessage" class="m-3"></div>
+                <div class="m-3">
+                    <button type="button" class="btn btn-info" id="generateTokenBtn" style="display: none;" onclick="generateToken()">Generate Token</button>
+                </div>
+
                 <div class="modal-body">
                     <div class="container">
 
@@ -256,6 +260,7 @@
 
     <script>
        $(document).ready(function () {
+       
         document.getElementById('orderTypeSelect').addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         const orderTypeName = selectedOption.getAttribute('data-name');
@@ -522,7 +527,15 @@ function updateSubtotal(input) {
         success: function (response) {
             if (response.success) {
                 //$("#paymentModal").modal('hide');
-                $("#modalMessage").html(`<div class="alert alert-success">${response.message}</div>`);
+                $("#modalMessage").html(`
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        ${response.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `);
+                localStorage.setItem('latestOrderId', response.order_id);
+                $('#generateTokenBtn').show();
+
                 $("#saveOrder").prop("disabled", true);
 
                 $("#total-amount").text("Total: ₹0.00");
@@ -540,13 +553,24 @@ function updateSubtotal(input) {
                 $("#totalAmount, #totalPayable, #balanceAmount, #totalPaying").text("0.00"); // Reset totals
             } else {
                 let errorMessage = "Error placing order: " + response.message;
-                $("#modalMessage").html(`<div class="alert alert-danger">${errorMessage}</div>`);
+                $("#modalMessage").html(`
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        Error placing order: ${errorMessage}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `);
+                
                 // $("#errorMessage").text("Error placing order: " + response.message).fadeIn().delay(3000).fadeOut();
             }
         },
         error: function (xhr) {
             let errorMessage = xhr.responseJSON?.message || "An error occurred. Please try again.";
-            $("#modalMessage").html(`<div class="alert alert-danger">${errorMessage}</div>`);
+            $("#modalMessage").html(`
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    ${errorMessage}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `);
             // $("#errorMessage").text("Something went wrong. Please try again.").fadeIn().delay(3000).fadeOut();
             // console.error(xhr.responseText);
         }
@@ -567,6 +591,10 @@ function togglePayButton() {
     } else {
         $("#openPaymentModal").prop("disabled", true);
     }
+}
+function generateToken() {
+    const orderId = localStorage.getItem('latestOrderId'); // Assume you save the order ID after placing the order
+    window.open(`/restaurant/generate-token/${orderId}`, '_blank');
 }
 
 let products = [];

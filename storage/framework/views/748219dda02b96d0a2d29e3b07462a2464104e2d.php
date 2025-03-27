@@ -5,12 +5,31 @@
 <div class="container mt-4">
     <h2 class="mb-4">Stock Management</h2>
 
+    <!-- Display Success or Error Messages -->
+    <?php if(session('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <?php echo e(session('success')); ?>
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php elseif(session('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <?php echo e(session('error')); ?>
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <div class="mb-4 d-flex justify-content-between">
+        <!-- Add Stock Button -->
+        <a href="<?php echo e(route('restaurant.stocks.create')); ?>" class="btn btn-primary">Add Stock</a>
+        
+        <!-- Download Sample Excel -->
+        <a href="<?php echo e(route('restaurant.stocks.downloadSample')); ?>" class="btn btn-success">Download Sample Excel</a>
+    </div>
     <!-- Bulk Upload Form Section -->
     <div class="mb-4 p-3 bg-light border rounded">
-        <h5 class="mb-3">Upload Stock Data (Excel)</h5>
-
-        <!-- Download Sample Excel -->
-        <a href="<?php echo e(route('restaurant.stocks.downloadSample')); ?>" class="btn btn-success mb-3">Download Sample Excel</a>
+        
 
         <!-- Upload Form -->
         <form action="<?php echo e(route('restaurant.stocks.uploadBulk')); ?>" method="POST" enctype="multipart/form-data" class="mb-4">
@@ -57,11 +76,10 @@
                     <td>
                         <button type="submit" class="btn btn-success btn-sm">Update</button>
                          <!-- Delete Button -->
-                         <form action="<?php echo e(route('restaurant.stocks.destroy', $stock->id)); ?>" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this stock?');">
-                            <?php echo csrf_field(); ?>
-                            <?php echo method_field('DELETE'); ?>
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
+                         <button type="button" class="btn btn-danger btn-sm" 
+                                onclick="confirmDelete(<?php echo e($stock->id); ?>)">
+                            Delete
+                        </button>
                     </td>
                 </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
@@ -73,12 +91,28 @@
         </table>
     </form>
 
+    <!-- Delete Form (Hidden) -->
+    <form id="deleteForm" method="POST" style="display: none;">
+        <?php echo csrf_field(); ?>
+        <?php echo method_field('DELETE'); ?>
+    </form>
+
     <!-- Pagination -->
     <div class="d-flex justify-content-center">
         <?php echo e($stocks->links()); ?>
 
     </div>
 </div>
+
+    <script>
+        function confirmDelete(stockId) {
+            if (confirm('Are you sure you want to delete this stock?')) {
+                const form = document.getElementById('deleteForm');
+                form.action = `/restaurant/stocks/${stockId}`;
+                form.submit();
+            }
+        }
+    </script>
 
 <?php $__env->stopSection(); ?>
 

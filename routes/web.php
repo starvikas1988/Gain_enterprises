@@ -8,6 +8,7 @@ use App\Http\Controllers\Restaurant\StockController;
 use App\Http\Controllers\Restaurant\ProductController;
 use App\Http\Controllers\Restaurant\CategoryController;
 use App\Http\Controllers\Restaurant\RestaurantTablenumberController;
+use App\Http\Controllers\Restaurant\HomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -131,6 +132,7 @@ Route::prefix('restaurant')->group(function () {
         Route::post('/orders/get-products', [KotController::class, 'getProductsByCategory'])->name('restaurant.getProducts');
         Route::post('/verify-coupon', [KotController::class, 'verifyCoupon'])->name('coupon.verify');
         Route::post('/place-order', [KotController::class, 'place_order'])->name('orders.place');
+        Route::get('/generate-token/{id}', [KotController::class, 'generateToken'])->name('restaurant.generateToken');
 
         Route::get('/orders', [OrderController::class, 'index'])->name('restaurant.orders');
         Route::get('/orders/{id}', [OrderController::class, 'show'])->name('restaurant.orders.view');
@@ -175,14 +177,30 @@ Route::prefix('restaurant')->group(function () {
             'index' => 'restaurant.stocks.index',
         ]);
 
-        Route::post('/restaurant/stocks/uploadBulk', [StockController::class, 'uploadBulk'])->name('restaurant.stocks.uploadBulk');
-        Route::post('/restaurant/stocks/updateBulk', [StockController::class, 'updateBulk'])->name('restaurant.stocks.updateBulk');
-        Route::delete('/restaurant/stocks/{id}', [StockController::class, 'destroy'])->name('restaurant.stocks.destroy');
+        // Route::post('/restaurant/stocks/uploadBulk', [StockController::class, 'uploadBulk'])->name('restaurant.stocks.uploadBulk');
+
+
+        // Route::delete('/restaurant/stocks/{id}', [StockController::class, 'destroy'])->name('restaurant.stocks.destroy');
         Route::get('/restaurant/stocks/downloadSample', [StockController::class, 'downloadSample'])->name('restaurant.stocks.downloadSample');
 
+        Route::get('/stocks/create', [StockController::class, 'create'])->name('restaurant.stocks.create');
+        // Route::post('/restaurant/stocks/store', [StockController::class, 'store'])->name('restaurant.stocks.store');
+       
+        Route::get('/stocks/products/{categoryId}', [StockController::class, 'getProductsByCategory'])
+        ->name('restaurant.stocks.getProductsByCategory');
+
+        Route::post('/stocks/uploadBulk', [StockController::class, 'uploadBulk'])->name('restaurant.stocks.uploadBulk');
+        Route::delete('/stocks/{id}', [StockController::class, 'destroy'])->name('restaurant.stocks.destroy');
+
+        Route::post('/stocks/updateBulk', [StockController::class, 'updateBulk'])->name('restaurant.stocks.updateBulk');
+       
+        // Route::get('/stocks/downloadSample', [StockController::class, 'downloadSample'])->name('restaurant.stocks.downloadSample');
+        Route::post('/stocks/store', [StockController::class, 'store'])->name('restaurant.stocks.store');
 
 
-        
+        Route::post('/orders/update-status', [HomeController::class, 'updateOrderStatus'])->name('restaurant.orders.updateStatus');
+        Route::post('/orders/change-status', [HomeController::class, 'changeOrderStatus'])->name('restaurant.orders.changeStatus');
+
         // Route::get('/dashboard', function () {
         //     return view('restaurant.dashboard');
         // })->name('restaurant.dashboard');

@@ -2,8 +2,9 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\FromCollection;
+use App\Models\Product;
 use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\FromCollection;
 
 class StockSampleExport implements FromArray
 {
@@ -12,10 +13,26 @@ class StockSampleExport implements FromArray
     */
     public function array(): array
     {
-        return [
-            ['category_id', 'product_id', 'default_stock', 'todays_stock'],
-            ['1', '1', '100', '50'], // Example Data
-            ['2', '3', '100', '30'],
+        // Header Row
+        $data = [
+            ['category_id', 'category_name', 'product_id', 'product_name', 'default_stock', 'todays_stock'],
         ];
+
+        // Fetch Categories and Products
+        $products = Product::with('category')->get();
+
+        // Example Data
+        foreach ($products as $product) {
+            $data[] = [
+                $product->category->id,
+                $product->category->name,
+                $product->id,
+                $product->name,
+                100, // Default Stock
+                50,  // Today's Stock
+            ];
+        }
+
+        return $data;
     }
 }

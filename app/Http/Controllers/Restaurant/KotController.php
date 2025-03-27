@@ -12,6 +12,8 @@ use App\Models\UserAddress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class KotController extends Controller
 {
@@ -27,9 +29,9 @@ class KotController extends Controller
         $products = Product::all();
         $orderTypes = DB::table('order_types')->get();
         $tables = DB::table('restaurant_tablenumbers')
-                ->where('restaurant_id', $restaurantId)
-                ->get();
-        return view('Restaurant.kot', compact('categories', 'products','orderTypes','tables'));
+            ->where('restaurant_id', $restaurantId)
+            ->get();
+        return view('Restaurant.kot', compact('categories', 'products', 'orderTypes', 'tables'));
     }
 
     public function getProductsByCategory(Request $request)
@@ -73,37 +75,29 @@ class KotController extends Controller
     }
 
     private function verifyCouponKot($code, $totalAmount)
-	{
-	    $couponData = Coupon::where('code', $code)
-                            ->where('status', 'A')
-                            ->first();
-        if($couponData)
-        {
+    {
+        $couponData = Coupon::where('code', $code)
+            ->where('status', 'A')
+            ->first();
+        if ($couponData) {
             $today = date('Y-m-d');
-            if($couponData->start_date <= $today)
-            {
-                if($couponData->end_date >= $today)
-                {
-                    if($totalAmount >= $couponData->required_amount)
-                    {
+            if ($couponData->start_date <= $today) {
+                if ($couponData->end_date >= $today) {
+                    if ($totalAmount >= $couponData->required_amount) {
                         $data = [
-                            'discountAmount' => round(($totalAmount*$couponData->discount_percentage/100),2),
+                            'discountAmount' => round(($totalAmount * $couponData->discount_percentage / 100), 2),
                             'description' => $couponData->description,
                         ];
-                        return response()->json(['success' => true,'errorcode'=>'00','message' => 'Coupon applied successfully.', 'data'=>[$data]], 200);
-                    }
-                    else
-                        return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Required amount ₹'.($couponData->required_amount-$totalAmount).' more to cart for apply this coupon!', 'data'=>array()], 200);
-                }
-                else
-                    return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Coupon code expired!', 'data'=>array()], 200);
-            }
-            else
-                return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Coupon code not valid for today!', 'data'=>array()], 200);
-        }
-        else
-            return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Invalid coupon code!', 'data'=>array()], 200);
-	}
+                        return response()->json(['success' => true, 'errorcode' => '00', 'message' => 'Coupon applied successfully.', 'data' => [$data]], 200);
+                    } else
+                        return response()->json(['success' => false, 'errorcode' => '03', 'message' => 'Required amount ₹' . ($couponData->required_amount - $totalAmount) . ' more to cart for apply this coupon!', 'data' => array()], 200);
+                } else
+                    return response()->json(['success' => false, 'errorcode' => '03', 'message' => 'Coupon code expired!', 'data' => array()], 200);
+            } else
+                return response()->json(['success' => false, 'errorcode' => '03', 'message' => 'Coupon code not valid for today!', 'data' => array()], 200);
+        } else
+            return response()->json(['success' => false, 'errorcode' => '03', 'message' => 'Invalid coupon code!', 'data' => array()], 200);
+    }
 
     public function place_order(Request $request)
     {
@@ -157,16 +151,6 @@ class KotController extends Controller
                 $discountAmount = $couponData->data[0]->discountAmount;
             }
         }
-       
-
-        // if($request->orderType == 'Delivery')
-        // {
-        //     $addressData = UserAddress::where('user_id', $userId)
-        //         ->where('id', $request->addressId)
-        //         ->count();
-        //     if($addressData == 0)
-        //         return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Invalid address id!', 'data'=>array()], 200); 
-        // }
 
         // Create order
 
@@ -175,9 +159,10 @@ class KotController extends Controller
         $order->address_id = ($restaurantData->address ? $restaurantData->address : NULL);
         $order->order_type = $request->order_type;
         $order->created_by = 'WEB';
+        $order->token_no = 'TKN' . strtoupper(uniqid());
         $order->table_id = ($request->table_id ? $request->table_id : NULL);
-        $order->booking_platform='KOT';
-        $order->payment_type=$request->payment_account;
+        $order->booking_platform = 'KOT';
+        $order->payment_type = $request->payment_account;
         $order->total_amount = $totalAmount - $discountAmount;
         $order->total_discount = $discountAmount;
         $order->coupon_code = $couponCode;
@@ -192,16 +177,7 @@ class KotController extends Controller
         $order->created_at = date('Y-m-d H:i:s');
         $order->updated_at = date('Y-m-d H:i:s');
         $order->save();
-        // $order = Order::create([
-        //     'restaurant_id' => $request->restaurant_id,
-        //     'total_amount' => $request->total_amount,
-        //     'payment_account' => $request->payment_account,
-        //     'payment_note' => $request->payment_note,
-        //     'coupon_code' => $request->coupon_code,
-        //     'coupon_amount' => $request->coupon_amount,
-        //     'total_discount' => $request->total_discount,
-        //     'status' => 'Pending'
-        // ]);
+
 
         // Save order items
 
@@ -220,18 +196,97 @@ class KotController extends Controller
                 $orderItem->created_at = date('Y-m-d H:i:s');
                 $orderItem->updated_at = date('Y-m-d H:i:s');
                 $orderItem->save();
-
-                // OrderItem::create([
-                //     'order_id' => $order->id,
-                //     'restaurant_id' => $request->restaurant_id,
-                //     'product_id' => $item['product_id'],
-                //     'quantity' => $item['quantity'],
-                //     'price' => $item['amount']
-                // ]);
             }
         }
 
-
-        return response()->json(['success' => true, 'message' => 'Order placed successfully!']);
+        return response()->json(['success' => true, 'message' => 'Order placed successfully!', 'order_id' => $order->id]);
     }
+
+    public function generateToken($orderId)
+    {
+        // Fetch order details using query builder
+        $order = DB::table('orders')
+            ->join('restaurants', 'orders.restaurant_id', '=', 'restaurants.id')
+            ->leftJoin('restaurant_tablenumbers', 'orders.table_id', '=', 'restaurant_tablenumbers.id')
+            ->leftJoin('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->leftJoin('products', 'order_items.product_id', '=', 'products.id')
+            ->select(
+                'orders.*',
+                'restaurants.name as restaurant_name',
+                'restaurants.gst_percentage',
+                'restaurants.gst_type',
+                'restaurant_tablenumbers.table_number as table_number',
+                'order_items.product_id',
+                'order_items.quantity',
+                'order_items.amount as item_amount',
+                'products.name as product_name',
+                'products.price as product_price'
+            )
+            ->where('orders.id', $orderId)
+            ->get();
+
+        if ($order->isEmpty()) {
+            abort(404, 'Order not found');
+        }
+
+        // Group data
+        $groupedData = $order->groupBy('product_id');
+
+        // Return the view directly for printing
+        return view('restaurant.token_pdf', [
+            'order' => $order->first(),
+            'groupedData' => $groupedData
+        ]);
+    }
+
+    // public function generateToken($orderId)
+    // {
+    //     // Fetch order details using query builder
+    //     $order = DB::table('orders')
+    //         ->join('restaurants', 'orders.restaurant_id', '=', 'restaurants.id')
+    //         ->leftJoin('restaurant_tablenumbers', 'orders.table_id', '=', 'restaurant_tablenumbers.id')
+    //         ->leftJoin('order_items', 'orders.id', '=', 'order_items.order_id')
+    //         ->leftJoin('products', 'order_items.product_id', '=', 'products.id')
+    //         ->select(
+    //             'orders.*',
+    //             'restaurants.name as restaurant_name',
+    //             'restaurants.gst_percentage',
+    //             'restaurants.gst_type',
+    //             'restaurant_tablenumbers.table_number as table_number',
+    //             'order_items.product_id',
+    //             'order_items.quantity',
+    //             'order_items.amount as item_amount',
+    //             'products.name as product_name',
+    //             'products.price as product_price'
+    //         )
+    //         ->where('orders.id', $orderId)
+    //         ->get();
+
+    //     if ($order->isEmpty()) {
+    //         abort(404, 'Order not found');
+    //     }
+
+    //     // Group the data for easier use in the view
+    //     $groupedData = $order->groupBy('product_id');
+
+    //     // Configure PDF options
+    //     $options = new Options();
+    //     $options->set('defaultFont', 'Helvetica');
+    //     $dompdf = new Dompdf($options);
+
+    //     // Generate view
+    //     $pdfView = view('restaurant.token_pdf', [
+    //         'order' => $order->first(), 
+    //         'groupedData' => $groupedData
+    //     ])->render();
+
+    //     $dompdf->loadHtml($pdfView);
+    //     $dompdf->setPaper('A4', 'portrait');
+    //     $dompdf->render();
+
+    //     // Download PDF
+    //     return $dompdf->stream('Token_'.$order->first()->token_no.'.pdf');
+    // }
+
+
 }

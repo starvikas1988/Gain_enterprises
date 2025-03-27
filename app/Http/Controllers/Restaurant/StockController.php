@@ -12,6 +12,7 @@ use App\Exports\StockSampleExport;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
 
+
 class StockController extends Controller
 {
     public function index(Request $request)
@@ -21,8 +22,19 @@ class StockController extends Controller
         return view('Restaurant.stocks.index', compact('stocks'));
     }
 
+  
+
+    public function destroy($id)
+    {
+        $stock = Stock::findOrFail($id);
+        $stock->delete();
+
+        return redirect()->route('restaurant.stocks.index')->with('success', 'Stock deleted successfully!');
+    }
+
     public function updateBulk(Request $request)
     {
+        
         $data = $request->input('stocks');
 
         if ($data) {
@@ -40,14 +52,6 @@ class StockController extends Controller
         }
 
         return redirect()->route('restaurant.stocks.index')->with('error', 'No stock data provided.');
-    }
-
-    public function destroy($id)
-    {
-        $stock = Stock::findOrFail($id);
-        $stock->delete();
-
-        return redirect()->route('restaurant.stocks.index')->with('success', 'Stock deleted successfully!');
     }
 
     public function uploadBulk(Request $request)
@@ -69,4 +73,51 @@ class StockController extends Controller
     {
         return Excel::download(new StockSampleExport, 'stock_sample.xlsx');
     }
+
+    public function getProductsByCategory($categoryId)
+    {
+        $products = Product::where('category_id', $categoryId)->get(['id', 'name']);
+
+        if ($products->isEmpty()) {
+            return response()->json(['message' => 'No products found'], 404);
+        }
+
+        return response()->json($products);
+    }
+
+
+    public function create()
+    {
+        $categories = Category::where('status', 'A')->get();
+        return view('restaurant.stocks.create', compact('categories'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'product_id' => 'required|exists:products,id',
+            'default_stock' => 'required|integer|min:0',
+            'todays_stock' => 'required|integer|min:0',
+        ]);
+    
+        try {
+            // Check if stock with same category and product exists
+            $stock = Stock::updateOrCreate(
+                [
+                    'category_id' => $request->category_id,
+                    'product_id' => $request->product_id,
+                ],
+                [
+                    'default_stock' => $request->default_stock,
+                    'todays_stock' => $request->todays_stock,
+                ]
+            );
+    
+            return redirect()->route('restaurant.stocks.index')->with('success', 'Stock entry added/updated successfully!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
+    
 }

@@ -20,8 +20,27 @@ class HomeController extends Controller
     {
         $restaurantId = Auth::user()->id;
         $orderCount = Order::where('restaurant_id', $restaurantId)->count();
-        // return view('restaurant.dashboard');
-        return view('Restaurant.dashboard', compact('orderCount'));
+        
+        // Fetch KOT Orders
+        $kotOrders = Order::where('restaurant_id', $restaurantId)
+        ->whereNotNull('table_id')
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+
+        // Fetch Web Orders (booking_platform != KOT)
+        $webOrders = Order::where('restaurant_id', $restaurantId)
+        ->whereNull('table_id')
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+
+        // $webOrders = Order::whereNull('booking_platform')
+        // ->whereNull('restaurant_id')
+        // ->orderBy('created_at', 'desc')
+        // ->get();
+
+        return view('Restaurant.dashboard', compact('orderCount','kotOrders', 'webOrders'));
     }
 
     public function myprofile()
@@ -72,4 +91,43 @@ class HomeController extends Controller
 
         return redirect(route('restaurant.myprofile'))->withSuccess('Profile updated successfully');
     }
+
+    public function updateOrderStatus(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'order_status' => 'required|in:Pending,Processing,Completed',
+            'payment_status' => 'required|in:Pending,SUCCESS,Failed',
+        ]);
+
+        $order = Order::findOrFail($request->order_id);
+        $order->order_status = $request->order_status;
+        $order->payment_status = $request->payment_status;
+        $order->save();
+
+        return response()->json(['success' => true, 'message' => 'Order status updated successfully']);
+    }
+
+    public function changeOrderStatus(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'order_status' => 'required|in:Pending,Processing,Completed',
+            'payment_status' => 'nullable|in:Pending,SUCCESS,Failed',
+        ]);
+
+        $order = Order::findOrFail($request->order_id);
+        $order->order_status = $request->order_status;
+
+        // Update payment status only if applicable (Cash or UPI)
+        if (in_array($order->payment_type, ['cash', 'upi']) && $request->payment_status) {
+            $order->payment_status = $request->payment_status;
+        }
+
+        $order->save();
+
+        return response()->json(['success' => true, 'message' => 'Order status updated successfully']);
+    }
+
+
 }

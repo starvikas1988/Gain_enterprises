@@ -50,6 +50,7 @@
                     <th>Order Type</th>
                     <th>Booking Platform</th>
                     <th>Total Amount</th>
+                    <th>Order Status</th>
                     <th>Payment Status</th>
                     <th>Order Date</th>
                     <th>Action</th>
@@ -62,6 +63,15 @@
                         <td>{{ $order->order_type }}</td>
                         <td>{{ $order->booking_platform }}</td>
                         <td>₹{{ number_format($order->total_amount, 2) }}</td>
+                        <td>
+                            @if ($order->order_status == 'Pending')
+                                <span class="badge bg-warning">Pending</span>
+                            @elseif ($order->order_status == 'Completed')
+                                <span class="badge bg-success">Completed</span>
+                            @else
+                                <span class="badge bg-danger">Canceled</span>
+                            @endif
+                        </td>
                         <td>
                             @if ($order->payment_status == 'Pending')
                                 <span class="badge bg-warning">Pending</span>

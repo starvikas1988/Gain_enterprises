@@ -761,6 +761,15 @@ class CustomerController extends Controller
 		                if($addressData == 0)
 		                    return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Invalid address id!', 'data'=>array()], 200); 
                     }
+
+                    if($request->orderType == 'Dine In'){
+                        
+                        $defaultTableId = now()->timestamp;
+                    }else{
+                        $defaultTableId = NULL;
+                    }   
+                   
+
                     
                     // if($request->addressId == 'null')
                     //     $request->addressId = 
@@ -770,7 +779,7 @@ class CustomerController extends Controller
                     $order->address_id = ($request->addressId ? $request->addressId :NULL);
                     $order->order_type = $request->orderType;
                     $order->restaurant_id = $request->restaurant_id;
-                    $order->table_id = $request->table_id;
+                    $order->table_id = $defaultTableId;
                     $order->created_by = $request->created_by;
                     $order->total_amount = $totalAmount - $discountAmount;
                     $order->total_discount = $discountAmount;
