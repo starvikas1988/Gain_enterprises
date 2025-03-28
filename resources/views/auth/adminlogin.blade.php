@@ -69,6 +69,10 @@
 
                                 <div class="mb-3 mb-0 text-center">
                                     <button class="btn btn-primary" type="submit"> Log In </button>
+                                    
+                                </div>
+                                <div class="text-center">
+                                    <a href="{{ route('admin.password.request') }}" class="btn btn-primary">Forgot Password?</a>
                                 </div>
 
                             </form>

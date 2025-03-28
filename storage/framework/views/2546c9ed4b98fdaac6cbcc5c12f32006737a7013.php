@@ -97,6 +97,10 @@ unset($__errorArgs, $__bag); ?>
 
                                 <div class="mb-3 mb-0 text-center">
                                     <button class="btn btn-primary" type="submit"> Log In </button>
+                                    
+                                </div>
+                                <div class="text-center">
+                                    <a href="<?php echo e(route('admin.password.request')); ?>" class="btn btn-primary">Forgot Password?</a>
                                 </div>
 
                             </form>

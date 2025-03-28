@@ -41,6 +41,18 @@ Route::get('/customersearch', [App\Http\Controllers\CommonController::class, 'se
 Route::post('/getbalance', [App\Http\Controllers\CommonController::class, 'get_balance'])->name('balance'); 
 
 Auth::routes();
+Route::prefix('admin')->group(function () {
+
+    // Admin Forgot Password Routes
+    Route::get('/forgot-password', [App\Http\Controllers\Auth\AdminForgotPasswordController::class, 'showLinkRequestForm'])->name('admin.password.request');
+    Route::post('/forgot-password', [App\Http\Controllers\Auth\AdminForgotPasswordController::class, 'sendResetLinkEmail'])->name('admin.password.email');
+
+    // Admin Reset Password Routes
+    Route::get('/reset-password/{token}', [App\Http\Controllers\Auth\AdminResetPasswordController::class, 'showResetForm'])->name('admin.password.reset');
+    Route::post('/reset-password', [App\Http\Controllers\Auth\AdminResetPasswordController::class, 'reset'])->name('admin.password.update');
+});
+
+
 Route::prefix('admin')->group(function() {
     //Route::get('/', [App\Http\Controllers\Auth\AdminLoginController::class, 'showLoginForm'])->name('admin.login');
     Route::get('/login', [App\Http\Controllers\Auth\AdminLoginController::class, 'showLoginForm'])->name('admin.login');
@@ -113,6 +125,16 @@ Route::prefix('admin')->group(function() {
 				
     });
     
+});
+
+Route::prefix('restaurant')->group(function () {
+    Route::get('/forgot-password', [App\Http\Controllers\Auth\RestaurantForgotPasswordController::class, 'showLinkRequestForm'])->name('restaurant.password.request');
+    Route::post('/forgot-password', [App\Http\Controllers\Auth\RestaurantForgotPasswordController::class, 'sendResetLinkEmail'])->name('restaurant.password.email');
+    Route::get('/reset-password/{token}', [App\Http\Controllers\Auth\RestaurantResetPasswordController::class, 'showResetForm'])->name('restaurant.password.reset');
+    // Route::post('/reset-password', [App\Http\Controllers\Auth\RestaurantResetPasswordController::class, 'reset'])->name('restaurant.password.update');
+    Route::post('/password/reset', [App\Http\Controllers\Auth\RestaurantResetPasswordController::class, 'reset'])
+    ->name('restaurant.password.update');
+
 });
 
 Route::prefix('restaurant')->group(function () {

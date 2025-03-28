@@ -98,6 +98,10 @@ unset($__errorArgs, $__bag); ?>
                                 <div class="mb-3 mb-0 text-center">
                                     <button class="btn btn-primary" type="submit"> Log In </button>
                                 </div>
+                                <div class="text-center">
+                                    
+                                    <a href="<?php echo e(route('restaurant.password.request')); ?>" class="btn btn-primary">Forgot Password?</a>
+                                </div>
 
                             </form>
                         </div> <!-- end card-body -->
@@ -111,6 +115,31 @@ unset($__errorArgs, $__bag); ?>
         <!-- end container -->
     </div>
     <!-- end page -->
+
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="forgotPasswordModalLabel">Forgot Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="forgotPasswordForm">
+                        <?php echo csrf_field(); ?>
+                        <div class="mb-3">
+                            <label for="forgotEmail" class="form-label">Enter your email address</label>
+                            <input type="email" class="form-control" id="forgotEmail" name="email" required>
+                        </div>
+                        
+
+                        
+                    </form>
+                    <div id="forgotPasswordMessage" class="mt-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </body>
 <!-- bundle -->
     <script src="<?php echo e(asset('public/backend/assets/js/vendor.min.js')); ?>"></script>

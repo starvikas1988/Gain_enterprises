@@ -8,10 +8,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Traits\HasPermissionsTrait;
+use App\Notifications\AdminResetPasswordNotification;
+
 
 class Admin extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasPermissionsTrait;
+    
 
     /**
      * The attributes that are mass assignable.
@@ -45,4 +48,9 @@ class Admin extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new AdminResetPasswordNotification($token));
+    }
 }

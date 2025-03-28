@@ -61,8 +61,11 @@
                 @forelse($stocks as $stock)
                 <tr>
                     <td>{{ $stock->id }}</td>
-                    <td>{{ $stock->category->name }}</td>
-                    <td>{{ $stock->product->name }}</td>
+                    <td>{{ optional($stock->product)->name ?? 'N/A' }}</td>
+                    <td>{{ optional($stock->category)->name ?? 'N/A' }}</td>
+
+                    {{-- <td>{{ $stock->category->name }}</td>
+                    <td>{{ $stock->product->name }}</td> --}}
                     
                     <!-- Editable Default Stock -->
                     <td>

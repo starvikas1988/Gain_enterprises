@@ -18,14 +18,16 @@
                     <img src="<?php echo e(asset('public/backend/assets/images/users/avatar-1.jpg')); ?>" alt="user-image" class="rounded-circle">
                 </span>
                 <span>
-                    <span class="account-user-name"><?php echo e(Auth::user()->name); ?></span>
-                    <span class="account-position"><?php echo e(Auth::user()->email); ?></span>
+                    
+
+                    <span class="account-user-name"><?php echo e(optional(Auth::user())->name ?? 'Guest'); ?></span>
+                    <span class="account-position"><?php echo e(optional(Auth::user())->email ?? 'Guest'); ?></span>
                 </span>
             </a>
             <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
                 <!-- item-->
                 <div class=" dropdown-header noti-title">
-                    <h6 class="text-overflow m-0">Welcome <?php echo e(Auth::user()->name); ?>!</h6>
+                    <h6 class="text-overflow m-0">Welcome <?php echo e(optional(Auth::user())->name ?? 'Guest'); ?>!</h6>
                 </div>
 
                 <!-- item-->

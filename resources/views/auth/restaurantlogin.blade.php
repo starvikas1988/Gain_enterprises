@@ -70,6 +70,10 @@
                                 <div class="mb-3 mb-0 text-center">
                                     <button class="btn btn-primary" type="submit"> Log In </button>
                                 </div>
+                                <div class="text-center">
+                                    {{-- <a href="#" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">Forgot Password?</a> --}}
+                                    <a href="{{ route('restaurant.password.request') }}" class="btn btn-primary">Forgot Password?</a>
+                                </div>
 
                             </form>
                         </div> <!-- end card-body -->
@@ -83,6 +87,31 @@
         <!-- end container -->
     </div>
     <!-- end page -->
+
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="forgotPasswordModalLabel">Forgot Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="forgotPasswordForm">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="forgotEmail" class="form-label">Enter your email address</label>
+                            <input type="email" class="form-control" id="forgotEmail" name="email" required>
+                        </div>
+                        
+
+                        {{-- <button type="submit" class="btn btn-primary">Send Reset Link</button> --}}
+                    </form>
+                    <div id="forgotPasswordMessage" class="mt-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </body>
 <!-- bundle -->
     <script src="{{ asset('public/backend/assets/js/vendor.min.js') }}"></script>

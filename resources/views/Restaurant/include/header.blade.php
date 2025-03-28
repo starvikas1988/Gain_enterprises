@@ -18,14 +18,16 @@
                     <img src="{{ asset('public/backend/assets/images/users/avatar-1.jpg') }}" alt="user-image" class="rounded-circle">
                 </span>
                 <span>
-                    <span class="account-user-name">{{Auth::user()->name}}</span>
-                    <span class="account-position">{{Auth::user()->email}}</span>
+                    {{-- <p>Welcome, {{ optional(Auth::user())->name ?? 'Guest' }}</p> --}}
+
+                    <span class="account-user-name">{{optional(Auth::user())->name ?? 'Guest'}}</span>
+                    <span class="account-position">{{optional(Auth::user())->email ?? 'Guest'}}</span>
                 </span>
             </a>
             <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
                 <!-- item-->
                 <div class=" dropdown-header noti-title">
-                    <h6 class="text-overflow m-0">Welcome {{Auth::user()->name}}!</h6>
+                    <h6 class="text-overflow m-0">Welcome {{optional(Auth::user())->name ?? 'Guest'}}!</h6>
                 </div>
 
                 <!-- item-->
