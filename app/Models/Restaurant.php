@@ -48,9 +48,6 @@ class Restaurant extends Authenticatable implements CanResetPassword
         // return 'https://caterer.gainenterprises.in/backend/' . $value;
         return $value ? asset($value) : asset('backend/default.png');
     }
-    
-    
-
 
     public function categories()
     {

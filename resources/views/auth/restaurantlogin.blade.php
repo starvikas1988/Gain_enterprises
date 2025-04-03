@@ -31,6 +31,7 @@
                         </div>
 
                         <div class="card-body p-4">
+                            <h3 class="text-center mb-3">Restaurant Login</h3>
                             @include('auth.messages')
                             <form method="POST" action="{{ route('restaurant.login.submit') }}">
                                 @csrf

@@ -15,8 +15,16 @@ class Role extends Model
         return $this->belongsTomany(Permission::class,'roles_permissions');
     }
 
+
+
     public function admins()
     {
         return $this->belongsTomany(Admins::class,'admins_role');
     }
+
+    public function employees()
+    {
+        return $this->belongsToMany(Employee::class, 'employee_roles', 'role_id', 'employee_id');
+    }
+    
 }

@@ -5,7 +5,6 @@
 <div class="container mt-4">
     <h2 class="mb-4">Stock Management</h2>
 
-    <!-- Display Success or Error Messages -->
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
@@ -19,29 +18,16 @@
     @endif
 
     <div class="mb-4 d-flex justify-content-between">
-        <!-- Add Stock Button -->
         <a href="{{ route('restaurant.stocks.create') }}" class="btn btn-primary">Add Stock</a>
-        
-        <!-- Download Sample Excel -->
         <a href="{{ route('restaurant.stocks.downloadSample') }}" class="btn btn-success">Download Sample Excel</a>
     </div>
-    <!-- Bulk Upload Form Section -->
-    <div class="mb-4 p-3 bg-light border rounded">
-        {{-- <h5 class="mb-3">Upload Stock Data (Excel)</h5>
 
-        <!-- Download Sample Excel -->
-        <a href="{{ route('restaurant.stocks.downloadSample') }}" class="btn btn-success mb-3">Download Sample Excel</a> --}}
-
-        <!-- Upload Form -->
-        <form action="{{ route('restaurant.stocks.uploadBulk') }}" method="POST" enctype="multipart/form-data" class="mb-4">
-            @csrf
-            <label for="file" class="form-label">Upload Stock File (Excel)</label>
-            <input type="file" name="file" id="file" class="form-control" accept=".xlsx, .csv" required>
-            <button type="submit" class="btn btn-primary mt-2">Upload & Update Stock</button>
-            
-        </form>
-        
-    </div>
+    <form action="{{ route('restaurant.stocks.uploadBulk') }}" method="POST" enctype="multipart/form-data" class="mb-4">
+        @csrf
+        <label for="file" class="form-label">Upload Stock File (Excel)</label>
+        <input type="file" name="file" id="file" class="form-control" accept=".xlsx, .csv" required>
+        <button type="submit" class="btn btn-primary mt-2">Upload & Update Stock</button>
+    </form>
 
     <!-- Stocks Table Section with Editable Fields -->
     <form action="{{ route('restaurant.stocks.updateBulk') }}" method="POST">
@@ -61,29 +47,33 @@
                 @forelse($stocks as $stock)
                 <tr>
                     <td>{{ $stock->id }}</td>
-                    <td>{{ optional($stock->product)->name ?? 'N/A' }}</td>
                     <td>{{ optional($stock->category)->name ?? 'N/A' }}</td>
-
-                    {{-- <td>{{ $stock->category->name }}</td>
-                    <td>{{ $stock->product->name }}</td> --}}
+                    <td>{{ optional($stock->product)->name ?? 'N/A' }}</td>
                     
                     <!-- Editable Default Stock -->
                     <td>
                         <input type="number" name="stocks[{{ $stock->id }}][default_stock]" class="form-control" value="{{ $stock->default_stock }}" min="0">
                     </td>
 
-                    <!-- Editable Today's Stock -->
+                    <!-- Editable Today's Stock with Conditional Display -->
                     <td>
-                        <input type="number" name="stocks[{{ $stock->id }}][todays_stock]" class="form-control" value="{{ $stock->todays_stock }}" min="0">
+                        @php
+                            $today = \Carbon\Carbon::today();
+                            $isToday = ($stock->updated_at && $stock->updated_at->isToday()) 
+                                        || (!$stock->updated_at && $stock->created_at->isToday());
+                        @endphp
+                        
+                        <input type="number" 
+                               name="stocks[{{ $stock->id }}][todays_stock]" 
+                               class="form-control" 
+                               value="{{ $isToday ? $stock->todays_stock : '' }}" 
+                               min="0" 
+                               placeholder="{{ $isToday ? '' : 'Enter Today\'s Stock' }}">
                     </td>
 
                     <td>
                         <button type="submit" class="btn btn-success btn-sm">Update</button>
-                         <!-- Delete Button -->
-                         <button type="button" class="btn btn-danger btn-sm" 
-                                onclick="confirmDelete({{ $stock->id }})">
-                            Delete
-                        </button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete({{ $stock->id }})">Delete</button>
                     </td>
                 </tr>
                 @empty
@@ -107,14 +97,14 @@
     </div>
 </div>
 
-    <script>
-        function confirmDelete(stockId) {
-            if (confirm('Are you sure you want to delete this stock?')) {
-                const form = document.getElementById('deleteForm');
-                form.action = `/restaurant/stocks/${stockId}`;
-                form.submit();
-            }
+<script>
+    function confirmDelete(stockId) {
+        if (confirm('Are you sure you want to delete this stock?')) {
+            const form = document.getElementById('deleteForm');
+            form.action = `/restaurant/stocks/${stockId}`;
+            form.submit();
         }
-    </script>
+    }
+</script>
 
 @endsection

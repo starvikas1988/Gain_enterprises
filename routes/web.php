@@ -3,12 +3,19 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Restaurant\KotController;
+use App\Http\Controllers\Restaurant\HomeController;
+use App\Http\Controllers\Restaurant\RoleController;
 use App\Http\Controllers\Restaurant\OrderController;
 use App\Http\Controllers\Restaurant\StockController;
 use App\Http\Controllers\Restaurant\ProductController;
+use App\Http\Controllers\Employee\Auth\LoginController;
 use App\Http\Controllers\Restaurant\CategoryController;
+use App\Http\Controllers\Restaurant\EmployeeController;
+use App\Http\Controllers\Restaurant\PurchaseController;
+use App\Http\Controllers\Restaurant\PermissionController;
+use App\Http\Controllers\Auth\EmployeeResetPasswordController;
+use App\Http\Controllers\Employee\EmployeeDashboardController;
 use App\Http\Controllers\Restaurant\RestaurantTablenumberController;
-use App\Http\Controllers\Restaurant\HomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -223,8 +230,142 @@ Route::prefix('restaurant')->group(function () {
         Route::post('/orders/update-status', [HomeController::class, 'updateOrderStatus'])->name('restaurant.orders.updateStatus');
         Route::post('/orders/change-status', [HomeController::class, 'changeOrderStatus'])->name('restaurant.orders.changeStatus');
 
+        Route::get('/todays_stock', [StockController::class, 'todaysStock'])->name('restaurant.stocks.todays_stock');
+
         // Route::get('/dashboard', function () {
         //     return view('restaurant.dashboard');
         // })->name('restaurant.dashboard');
     });
 });
+
+// Delivery Purchases Management
+Route::prefix('restaurant/purchases')->middleware('auth:restaurant')->group(function () {
+    Route::get('/dine_in', [PurchaseController::class, 'dineInPurchases'])->name('restaurant.purchases.dine_in');
+    Route::get('/home_delivery', [PurchaseController::class, 'homeDeliveryPurchases'])->name('restaurant.purchases.home_delivery');
+
+    // Common Edit, Update, and Delete routes for both
+    Route::get('/edit/{id}', [PurchaseController::class, 'edit'])->name('restaurant.purchases.edit');
+    Route::post('/update/{id}', [PurchaseController::class, 'update'])->name('restaurant.purchases.update');
+    Route::delete('/delete/{id}', [PurchaseController::class, 'destroy'])->name('restaurant.purchases.delete');
+});
+
+
+Route::middleware(['auth:restaurant'])->prefix('restaurant')->name('restaurant.')->group(function () {
+    Route::resource('employees', App\Http\Controllers\Restaurant\EmployeeController::class);
+});
+Route::middleware(['auth:restaurant'])->prefix('restaurant')->name('restaurant.')->group(function () {
+    Route::resource('roles', App\Http\Controllers\Restaurant\RoleController::class);
+    Route::resource('permissions', App\Http\Controllers\Restaurant\PermissionController::class);
+});
+
+Route::prefix('employee')->name('employee.')->group(function () {
+    Route::get('/login', [App\Http\Controllers\Auth\EmployeeLoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [App\Http\Controllers\Auth\EmployeeLoginController::class, 'login'])->name('login.submit');
+    Route::get('/logout', [App\Http\Controllers\Auth\EmployeeLoginController::class, 'logout'])->name('logout');
+
+    Route::middleware('auth:employee')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\Employee\HomeController::class, 'index'])->name('dashboard');
+        Route::get('/myprofile', [App\Http\Controllers\Employee\HomeController::class, 'myprofile'])->name('myprofile');
+        Route::post('/updateprofile', [App\Http\Controllers\Employee\HomeController::class, 'updateprofile'])->name('updateprofile');
+        Route::get('/changepassword', [App\Http\Controllers\Employee\HomeController::class, 'changepassword'])->name('changepassword');
+        Route::post('/passwordchange', [App\Http\Controllers\Employee\HomeController::class, 'passwordchange'])->name('passwordchange');
+
+        Route::get('/orders/kot', [App\Http\Controllers\Employee\KotController::class, 'index'])->name('kot');
+        Route::post('/orders/get-products', [App\Http\Controllers\Employee\KotController::class, 'getProductsByCategory'])->name('getProducts');
+        Route::post('/verify-coupon', [App\Http\Controllers\Employee\KotController::class, 'verifyCoupon'])->name('coupon.verify');
+        Route::post('/place-order', [App\Http\Controllers\Employee\KotController::class, 'placeOrder'])->name('orders.place');
+        Route::get('/generate-token/{id}', [App\Http\Controllers\Employee\KotController::class, 'generateToken'])->name('generateToken');
+
+        Route::get('/orders', [App\Http\Controllers\Employee\OrderController::class, 'index'])->name('orders');
+        Route::get('/orders/{id}', [App\Http\Controllers\Employee\OrderController::class, 'show'])->name('orders.view');
+        Route::delete('/orders/{id}', [App\Http\Controllers\Employee\OrderController::class, 'destroy'])->name('orders.delete');
+
+        Route::resource('/tables', App\Http\Controllers\Employee\RestaurantTablenumberController::class)
+        ->names([
+            'index' => 'tables.index',
+            'create' => 'tables.create',
+            'store' => 'tables.store',
+            'show' => 'tables.show',
+            'edit' => 'tables.edit',
+            'update' => 'tables.update',
+            'destroy' => 'tables.destroy',
+        ]);
+
+        Route::resource('/categories', App\Http\Controllers\Employee\CategoryController::class)
+        ->names([
+            'index' => 'categories.index',
+            'create' => 'categories.create',
+            'store' => 'categories.store',
+            'show' => 'categories.show',
+            'edit' => 'categories.edit',
+            'update' => 'categories.update',
+            'destroy' => 'categories.destroy',
+        ]);
+
+        Route::resource('/products', App\Http\Controllers\Employee\ProductController::class)
+        ->names([
+            'index' => 'products.index',
+            'create' => 'products.create',
+            'store' => 'products.store',
+            'show' => 'products.show',
+            'edit' => 'products.edit',
+            'update' => 'products.update',
+            'destroy' => 'products.destroy',
+        ]);
+
+        Route::resource('/stocks', App\Http\Controllers\Employee\StockController::class)
+        ->names([
+            'index' => 'stocks.index',
+        ]);
+
+       
+        Route::get('/employee/stocks/downloadSample', [App\Http\Controllers\Employee\StockController::class, 'downloadSample'])->name('stocks.downloadSample');
+
+        Route::get('/stocks/create', [App\Http\Controllers\Employee\StockController::class, 'create'])->name('stocks.create');
+     
+       
+        Route::get('/stocks/products/{categoryId}', [App\Http\Controllers\Employee\StockController::class, 'getProductsByCategory'])
+        ->name('stocks.getProductsByCategory');
+
+        Route::post('/stocks/uploadBulk', [App\Http\Controllers\Employee\StockController::class, 'uploadBulk'])->name('stocks.uploadBulk');
+        Route::delete('/stocks/{id}', [App\Http\Controllers\Employee\StockController::class, 'destroy'])->name('stocks.destroy');
+
+        Route::post('/stocks/updateBulk', [App\Http\Controllers\Employee\StockController::class, 'updateBulk'])->name('stocks.updateBulk');
+       
+   
+        Route::post('/stocks/store', [App\Http\Controllers\Employee\StockController::class, 'store'])->name('stocks.store');
+
+
+        Route::post('/orders/update-status', [App\Http\Controllers\Employee\HomeController::class, 'updateOrderStatus'])->name('orders.updateStatus');
+        Route::post('/orders/change-status', [App\Http\Controllers\Employee\HomeController::class, 'changeOrderStatus'])->name('orders.changeStatus');
+
+        Route::get('/todays_stock', [App\Http\Controllers\Employee\StockController::class, 'todaysStock'])->name('stocks.todays_stock');
+    });
+});
+
+Route::prefix('employee')->group(function () {
+    Route::get('/forgot-password', [App\Http\Controllers\Auth\EmployeeForgotPasswordController::class, 'showLinkRequestForm'])->name('employee.password.request');
+    Route::post('/forgot-password', [App\Http\Controllers\Auth\EmployeeForgotPasswordController::class, 'sendResetLinkEmail'])->name('employee.password.email');
+    Route::get('/reset-password/{token}', [App\Http\Controllers\Auth\EmployeeResetPasswordController::class, 'showResetForm'])->name('employee.password.reset');
+    Route::post('/password/reset', [App\Http\Controllers\Auth\EmployeeResetPasswordController::class, 'reset'])
+    ->name('employee.password.update');
+
+});
+
+Route::prefix('employee/purchases')->middleware('auth:employee')->group(function () {
+    Route::get('/dine_in', [App\Http\Controllers\Employee\PurchaseController::class, 'dineInPurchases'])->name('employee.purchases.dine_in');
+    Route::get('/home_delivery', [App\Http\Controllers\Employee\PurchaseController::class, 'homeDeliveryPurchases'])->name('employee.purchases.home_delivery');
+
+    // Common Edit, Update, and Delete routes for both
+    Route::get('/edit/{id}', [App\Http\Controllers\Employee\PurchaseController::class, 'edit'])->name('employee.purchases.edit');
+    Route::post('/update/{id}', [App\Http\Controllers\Employee\PurchaseController::class, 'update'])->name('employee.purchases.update');
+    Route::delete('/delete/{id}', [App\Http\Controllers\Employee\PurchaseController::class, 'destroy'])->name('employee.purchases.delete');
+});
+
+// Route::prefix('employee')->name('employee.')->middleware('auth:employee')->group(function () {
+//     Route::get('/test-auth', function () {
+//         return response()->json(['user' => auth()->guard('employee')->user()]);
+//     });
+// });
+
+

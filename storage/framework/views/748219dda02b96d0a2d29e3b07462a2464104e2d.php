@@ -5,7 +5,6 @@
 <div class="container mt-4">
     <h2 class="mb-4">Stock Management</h2>
 
-    <!-- Display Success or Error Messages -->
     <?php if(session('success')): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <?php echo e(session('success')); ?>
@@ -21,26 +20,16 @@
     <?php endif; ?>
 
     <div class="mb-4 d-flex justify-content-between">
-        <!-- Add Stock Button -->
         <a href="<?php echo e(route('restaurant.stocks.create')); ?>" class="btn btn-primary">Add Stock</a>
-        
-        <!-- Download Sample Excel -->
         <a href="<?php echo e(route('restaurant.stocks.downloadSample')); ?>" class="btn btn-success">Download Sample Excel</a>
     </div>
-    <!-- Bulk Upload Form Section -->
-    <div class="mb-4 p-3 bg-light border rounded">
-        
 
-        <!-- Upload Form -->
-        <form action="<?php echo e(route('restaurant.stocks.uploadBulk')); ?>" method="POST" enctype="multipart/form-data" class="mb-4">
-            <?php echo csrf_field(); ?>
-            <label for="file" class="form-label">Upload Stock File (Excel)</label>
-            <input type="file" name="file" id="file" class="form-control" accept=".xlsx, .csv" required>
-            <button type="submit" class="btn btn-primary mt-2">Upload & Update Stock</button>
-            
-        </form>
-        
-    </div>
+    <form action="<?php echo e(route('restaurant.stocks.uploadBulk')); ?>" method="POST" enctype="multipart/form-data" class="mb-4">
+        <?php echo csrf_field(); ?>
+        <label for="file" class="form-label">Upload Stock File (Excel)</label>
+        <input type="file" name="file" id="file" class="form-control" accept=".xlsx, .csv" required>
+        <button type="submit" class="btn btn-primary mt-2">Upload & Update Stock</button>
+    </form>
 
     <!-- Stocks Table Section with Editable Fields -->
     <form action="<?php echo e(route('restaurant.stocks.updateBulk')); ?>" method="POST">
@@ -60,26 +49,33 @@
                 <?php $__empty_1 = true; $__currentLoopData = $stocks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $stock): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr>
                     <td><?php echo e($stock->id); ?></td>
-                    <td><?php echo e($stock->category->name); ?></td>
-                    <td><?php echo e($stock->product->name); ?></td>
+                    <td><?php echo e(optional($stock->category)->name ?? 'N/A'); ?></td>
+                    <td><?php echo e(optional($stock->product)->name ?? 'N/A'); ?></td>
                     
                     <!-- Editable Default Stock -->
                     <td>
                         <input type="number" name="stocks[<?php echo e($stock->id); ?>][default_stock]" class="form-control" value="<?php echo e($stock->default_stock); ?>" min="0">
                     </td>
 
-                    <!-- Editable Today's Stock -->
+                    <!-- Editable Today's Stock with Conditional Display -->
                     <td>
-                        <input type="number" name="stocks[<?php echo e($stock->id); ?>][todays_stock]" class="form-control" value="<?php echo e($stock->todays_stock); ?>" min="0">
+                        <?php
+                            $today = \Carbon\Carbon::today();
+                            $isToday = ($stock->updated_at && $stock->updated_at->isToday()) 
+                                        || (!$stock->updated_at && $stock->created_at->isToday());
+                        ?>
+                        
+                        <input type="number" 
+                               name="stocks[<?php echo e($stock->id); ?>][todays_stock]" 
+                               class="form-control" 
+                               value="<?php echo e($isToday ? $stock->todays_stock : ''); ?>" 
+                               min="0" 
+                               placeholder="<?php echo e($isToday ? '' : 'Enter Today\'s Stock'); ?>">
                     </td>
 
                     <td>
                         <button type="submit" class="btn btn-success btn-sm">Update</button>
-                         <!-- Delete Button -->
-                         <button type="button" class="btn btn-danger btn-sm" 
-                                onclick="confirmDelete(<?php echo e($stock->id); ?>)">
-                            Delete
-                        </button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete(<?php echo e($stock->id); ?>)">Delete</button>
                     </td>
                 </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
@@ -104,15 +100,15 @@
     </div>
 </div>
 
-    <script>
-        function confirmDelete(stockId) {
-            if (confirm('Are you sure you want to delete this stock?')) {
-                const form = document.getElementById('deleteForm');
-                form.action = `/restaurant/stocks/${stockId}`;
-                form.submit();
-            }
+<script>
+    function confirmDelete(stockId) {
+        if (confirm('Are you sure you want to delete this stock?')) {
+            const form = document.getElementById('deleteForm');
+            form.action = `/restaurant/stocks/${stockId}`;
+            form.submit();
         }
-    </script>
+    }
+</script>
 
 <?php $__env->stopSection(); ?>
 

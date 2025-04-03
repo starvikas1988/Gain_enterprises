@@ -31,6 +31,7 @@
                         </div>
 
                         <div class="card-body p-4">
+                            <h3 class="text-center mb-3">Restaurant Login</h3>
                             <?php echo $__env->make('auth.messages', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                             <form method="POST" action="<?php echo e(route('restaurant.login.submit')); ?>">
                                 <?php echo csrf_field(); ?>

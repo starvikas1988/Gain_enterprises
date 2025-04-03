@@ -48,6 +48,10 @@ return [
         'driver' => 'session',
         'provider' => 'restaurants',
         ],
+        'employee' => [
+        'driver' => 'session',
+        'provider' => 'employees',
+    ],
 		
     ],
 
@@ -80,6 +84,11 @@ return [
         'restaurants' => [
             'driver' => 'eloquent',
             'model' => App\Models\Restaurant::class,
+        ],
+
+        'employees' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Employee::class,
         ],
     
 
@@ -122,6 +131,12 @@ return [
             'table' => 'password_resets',
             'expire' => 60,
             'throttle' => 60,
+        ],
+        'employees' => [
+            'provider' => 'employees', // Ensure you have 'employees' provider
+            'table' => 'password_resets', // Laravel 9+ uses 'password_reset_tokens'
+            'expire' => 60, // Token validity in minutes
+            'throttle' => 60, // How frequently a reset can be requested
         ],
     ],
 

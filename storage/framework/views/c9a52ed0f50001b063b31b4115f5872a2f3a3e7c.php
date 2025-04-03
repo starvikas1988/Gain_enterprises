@@ -36,6 +36,8 @@
                     <ul class="side-nav-second-level">
                         <li><a href="<?php echo e(url('restaurant/orders/kot')); ?>"><i class="uil-arrow-right"></i> KOT</a></li>
                         <li><a href="<?php echo e(url('restaurant/orders')); ?>"><i class="uil-arrow-right"></i> All Orders</a></li>
+                        <li><a href="<?php echo e(url('restaurant/purchases/dine_in')); ?>"><i class="uil-arrow-right"></i> Dine-In Purchases</a></li>
+                        <li><a href="<?php echo e(url('restaurant/purchases/home_delivery')); ?>"><i class="uil-arrow-right"></i> Delivery Purchases</a></li>
                     </ul>
                 </div>
             </li>
@@ -53,10 +55,16 @@
                         <li><a href="<?php echo e(route('restaurant.categories.index')); ?>"><i class="uil-arrow-right"></i> Manage Category</a></li>
                         <li><a href="<?php echo e(route('restaurant.products.index')); ?>"><i class="uil-arrow-right"></i> Manage Products</a></li>
                         <li><a href="<?php echo e(route('restaurant.stocks.index')); ?>"><i class="uil-arrow-right"></i> Manage Stocks</a></li>
+                        <li><a href="<?php echo e(route('restaurant.stocks.todays_stock')); ?>"><i class="uil-arrow-right"></i>Todays Stocks</a></li>
                     </ul>
                 </div>
             </li>
-
+            <li class="side-nav-item">
+                <a href="<?php echo e(route('restaurant.employees.index')); ?>" class="side-nav-link">
+                    <i class="uil-user"></i>
+                    <span>  Manage Employee </span>
+                </a>
+            </li>
             <!-- Profile -->
             <li class="side-nav-item">
                 <a href="<?php echo e(url('restaurant/myprofile')); ?>" class="side-nav-link">

@@ -4,10 +4,14 @@ namespace App\Http\Controllers\Restaurant;
 use Auth;
 use Hash;
 use App\Models\Order;
+use App\Models\Stock;
+use App\Models\OrderItem;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -34,13 +38,30 @@ class HomeController extends Controller
         ->orderBy('created_at', 'desc')
         ->get();
 
+           // Calculate today's overall stock count
+           $totalTodayStock = Stock::where('restaurant_id', $restaurantId)
+           ->where(function ($query) {
+               $query->whereDate('updated_at', Carbon::today())
+                     ->whereColumn('updated_at', '>', 'created_at');
+           })
+           ->orWhere(function ($query) {
+               $query->whereDate('created_at', Carbon::today())
+                     ->whereColumn('updated_at', '<=', 'created_at');
+           })
+           ->sum('todays_stock');
+
+          // Calculate total purchase count (from successful orders)
+        $totalPurchaseCount = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
+        ->where('orders.restaurant_id', $restaurantId)
+        ->where('orders.payment_status', 'SUCCESS')
+        ->sum('order_items.quantity');
 
         // $webOrders = Order::whereNull('booking_platform')
         // ->whereNull('restaurant_id')
         // ->orderBy('created_at', 'desc')
         // ->get();
 
-        return view('Restaurant.dashboard', compact('orderCount','kotOrders', 'webOrders'));
+        return view('Restaurant.dashboard', compact('orderCount','kotOrders', 'webOrders','totalTodayStock','totalPurchaseCount'));
     }
 
     public function myprofile()
