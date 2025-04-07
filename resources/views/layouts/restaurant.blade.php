@@ -30,13 +30,13 @@
         <!-- Begin page -->
         <div class="wrapper">
             <!-- ========== Left Sidebar Start ========== -->
-            @include('restaurant.include.sidebar')
+            @include('Restaurant.include.sidebar')
             <!-- Left Sidebar End -->
 
             <div class="content-page">
                 <div class="content">
                     <!-- Topbar Start -->
-                    @include('restaurant.include.header')
+                    @include('Restaurant.include.header')
                     <!-- end Topbar -->
                     
                     <!-- Start Content-->

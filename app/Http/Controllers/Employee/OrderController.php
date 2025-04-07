@@ -33,7 +33,7 @@ class OrderController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('Employee.orders', compact('orders', 'restaurant'));
+        return view('employee.orders', compact('orders', 'restaurant'));
     }
 
     public function show(Request $request,$id)
@@ -41,7 +41,7 @@ class OrderController extends Controller
         $order = Order::with('orderItems.product')->findOrFail($id);
         $employeePermissions = session('employeePermissions', []);
        // dd($employeePermissions);
-        return view('Employee.partials.order-details', compact('order','employeePermissions'));
+        return view('employee.partials.order-details', compact('order','employeePermissions'));
     }
 
     public function destroy($id)

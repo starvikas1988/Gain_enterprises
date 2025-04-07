@@ -120,16 +120,4 @@ class PurchaseController extends Controller
             ->with('success', 'Purchase deleted successfully');
     }
 
-
-    // public function destroy($id)
-    // {
-    //     $employee = auth()->guard('employee')->user();
-    //     $restaurantId = $employee->restaurant_id;
-    //     $order = Order::where('restaurant_id', $restaurantId->id())->findOrFail($id);
-    //     $order->delete();
-
-    //     return redirect()->route($order->table_id ? 'employee.purchases.dine_in' : 'employee.purchases.home_delivery')
-    //         ->with('success', 'Purchase deleted successfully');
-    // }
-
 }

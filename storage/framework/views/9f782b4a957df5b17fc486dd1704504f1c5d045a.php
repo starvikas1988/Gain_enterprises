@@ -30,13 +30,13 @@
         <!-- Begin page -->
         <div class="wrapper">
             <!-- ========== Left Sidebar Start ========== -->
-            <?php echo $__env->make('restaurant.include.sidebar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+            <?php echo $__env->make('Restaurant.include.sidebar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
             <!-- Left Sidebar End -->
 
             <div class="content-page">
                 <div class="content">
                     <!-- Topbar Start -->
-                    <?php echo $__env->make('restaurant.include.header', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+                    <?php echo $__env->make('Restaurant.include.header', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                     <!-- end Topbar -->
                     
                     <!-- Start Content-->

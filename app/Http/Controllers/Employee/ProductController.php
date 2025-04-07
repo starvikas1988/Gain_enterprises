@@ -44,7 +44,7 @@ class ProductController extends Controller
 
         $products = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('Employee.products.index', compact('products', 'categories'));
+        return view('employee.products.index', compact('products', 'categories'));
     }
 
     // Show the form for creating a new product
@@ -55,7 +55,7 @@ class ProductController extends Controller
 
         $categories = Category::where('restaurant_id', $restaurantId)->get();
 
-        return view('Employee.products.create', compact('categories'));
+        return view('employee.products.create', compact('categories'));
     }
 
     // Store a newly created product

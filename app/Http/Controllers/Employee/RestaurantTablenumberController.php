@@ -33,12 +33,12 @@ class RestaurantTablenumberController extends Controller
         // Paginate with 10 results per page
         $tables = $query->paginate(10);
 
-        return view('Employee.tables.index', compact('tables'));
+        return view('employee.tables.index', compact('tables'));
     }
 
     public function create()
     {
-        return view('Employee.tables.create');
+        return view('employee.tables.create');
     }
 
     public function store(Request $request)
@@ -68,7 +68,7 @@ class RestaurantTablenumberController extends Controller
         $restaurantId = auth()->guard('employee')->user()->restaurant_id;
 
         $table = RestaurantTablenumber::where('restaurant_id', $restaurantId)->findOrFail($id);
-        return view('Employee.tables.edit', compact('table'));
+        return view('employee.tables.edit', compact('table'));
     }
 
     public function update(Request $request, $id)

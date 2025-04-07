@@ -256,4 +256,36 @@ class HomeController extends Controller
     			return response()->json(['success' => false,'errorcode'=>'04', 'message'=>'No Product found!', 'data'=>array()], 200);
 		}
 	}
+
+    public function getRestaurantTables(){
+        $restaurantTables = DB::table('restaurant_tablenumbers')->get(['id', 'table_number', 'restaurant_id','capacity']);
+        if($restaurantTables->isNotEmpty())
+            return response()->json(['success' => true,'errorcode'=>'00','message' => 'data found', 'data'=>$restaurantTables], 200);
+        else
+            return response()->json(['success' => false,'errorcode'=>'04', 'message'=>'No data found!', 'data'=>array()], 200);
+    }
+
+    public function getCategoriesByTable($table_id)
+    {
+        // Find the table by ID
+        $table = \App\Models\RestaurantTableNumber::findOrFail($table_id);
+
+        // Fetch categories based on the restaurant ID from the table
+        $categories = \App\Models\Category::where('restaurant_id', $table->restaurant_id)
+            ->where('status', 'A')
+            ->get();
+
+        return response()->json($categories);
+    }
+
+    public function getProductsByCategory($category_id)
+    {
+        $products = \App\Models\Product::where('category_id', $category_id)
+            ->where('status', 'A')
+            ->get();
+
+        return response()->json($products);
+    }
+
+
 }

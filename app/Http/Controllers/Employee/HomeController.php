@@ -83,13 +83,13 @@ class HomeController extends Controller
         // ->orderBy('created_at', 'desc')
         // ->get();
 
-        return view('Employee.dashboard', compact('orderCount','kotOrders', 'webOrders','totalTodayStock','totalPurchaseCount'));
+        return view('employee.dashboard', compact('orderCount','kotOrders', 'webOrders','totalTodayStock','totalPurchaseCount'));
     }
 
     public function myprofile()
     {
         $user = Employee::find(Auth::guard('employee')->id());
-        return view('Employee.myprofile')->with(['user' => $user]);
+        return view('employee.myprofile')->with(['user' => $user]);
     }
 
     public function changepassword()

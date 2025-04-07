@@ -59,6 +59,7 @@
                                     <li><a href="{{url('admin/'.$menulist->slug)}}"><i class="uil-arrow-right"></i> {{$menulist->name}}</a></li>
                                     @endforeach
                                 @endif
+                              
                             </ul>
                         </div>
                     </li>

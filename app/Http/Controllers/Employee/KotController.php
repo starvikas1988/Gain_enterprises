@@ -33,7 +33,7 @@ class KotController extends Controller
             ->where('restaurant_id', $restaurantId)
             ->get();
 
-        return view('Employee.kot', compact('categories', 'products', 'orderTypes', 'tables'));
+        return view('employee.kot', compact('categories', 'products', 'orderTypes', 'tables'));
     }
 
     public function getProductsByCategory(Request $request)

@@ -91,7 +91,15 @@ Route::prefix('admin')->group(function() {
 
         Route::get('/delete-restaurant/{id}', [App\Http\Controllers\Admin\RestaurantController::class, 'destroy'])->name('admin.restaurant.delete'); 
 		
-    
+        // Table Management for Restaurants
+        Route::get('/table-numbers', [App\Http\Controllers\Admin\HomeController::class, 'tableNumberIndex'])->name('admin.table_numbers.index');
+        Route::get('/table-numbers/create', [App\Http\Controllers\Admin\HomeController::class, 'createTableNumber'])->name('admin.table_numbers.create');
+        Route::post('/table-numbers/store', [App\Http\Controllers\Admin\HomeController::class, 'storeTableNumber'])->name('admin.table_numbers.store');
+        Route::get('/table-numbers/edit/{id}', [App\Http\Controllers\Admin\HomeController::class, 'editTableNumber'])->name('admin.table_numbers.edit');
+        Route::post('/table-numbers/update/{id}', [App\Http\Controllers\Admin\HomeController::class, 'updateTableNumber'])->name('admin.table_numbers.update');
+
+        Route::get('/table-numbers/delete/{id}', [App\Http\Controllers\Admin\HomeController::class, 'deleteTableNumber'])->name('admin.table_numbers.delete');
+
 
 
         //Route::get('/restaurant-kyc/{id}', [App\Http\Controllers\Admin\RestaurantController::class, 'kyc'])->name('admin.restaurant.kyc');
@@ -313,12 +321,8 @@ Route::prefix('employee')->name('employee.')->group(function () {
             'destroy' => 'products.destroy',
         ]);
 
-        Route::resource('/stocks', App\Http\Controllers\Employee\StockController::class)
-        ->names([
-            'index' => 'stocks.index',
-        ]);
 
-       
+        Route::get('/stocks', [App\Http\Controllers\Employee\StockController::class, 'index'])->name('stocks.index');
         Route::get('/employee/stocks/downloadSample', [App\Http\Controllers\Employee\StockController::class, 'downloadSample'])->name('stocks.downloadSample');
 
         Route::get('/stocks/create', [App\Http\Controllers\Employee\StockController::class, 'create'])->name('stocks.create');

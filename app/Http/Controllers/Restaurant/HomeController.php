@@ -67,12 +67,12 @@ class HomeController extends Controller
     public function myprofile()
     {
         $user = Restaurant::find(Auth::guard('restaurant')->id());
-        return view('restaurant.myprofile')->with(['user' => $user]);
+        return view('Restaurant.myprofile')->with(['user' => $user]);
     }
 
     public function changepassword()
     {
-        return view('restaurant.changepassword');
+        return view('Restaurant.changepassword');
     }
 
     public function passwordchange(Request $request)

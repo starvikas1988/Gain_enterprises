@@ -56,7 +56,7 @@ class EmployeeController extends Controller
         }
     }
 
-    return view('restaurant.employees.index', compact('employees'));
+    return view('Restaurant.employees.index', compact('employees'));
 }
 
 
@@ -65,7 +65,7 @@ class EmployeeController extends Controller
     {
         $roles = DB::table('roles')->where('type', 'Restaurant')->get();
         $permissions = DB::table('permissions')->where('type', 'Restaurant')->get();
-        return view('restaurant.employees.create', compact('roles', 'permissions'));
+        return view('Restaurant.employees.create', compact('roles', 'permissions'));
     }
 
     // Store Employee Data
@@ -192,7 +192,7 @@ class EmployeeController extends Controller
         $employeeRole = DB::table('employee_roles')->where('employee_id', $id)->pluck('role_id')->first();
         $employeePermissions = DB::table('roles_permissions')->where('role_id', $employeeRole)->pluck('permission_id')->toArray();
 
-        return view('restaurant.employees.edit', compact('employee', 'roles', 'permissions', 'employeeRole', 'employeePermissions'));
+        return view('Restaurant.employees.edit', compact('employee', 'roles', 'permissions', 'employeeRole', 'employeePermissions'));
     }
 
     // Update Employee Data

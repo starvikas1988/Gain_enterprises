@@ -18,6 +18,12 @@ Route::post('v1/getAllProductByCategoryId', [App\Http\Controllers\Api\HomeContro
 Route::post('v1/searchProductOrRestaurant', [App\Http\Controllers\Api\HomeController::class, 'searchProductOrRestaurant']);
 Route::post('v1/getRecommendedProduct', [App\Http\Controllers\Api\HomeController::class, 'getRecommendedProduct']);
 
+Route::get('v1/getRestaurantTables', [App\Http\Controllers\Api\HomeController::class, 'getRestaurantTables']);
+
+Route::get('/v1/table/{table_id}/categories', [App\Http\Controllers\Api\HomeController::class, 'getCategoriesByTable']);
+Route::get('/v1/categories/{category_id}/products', [App\Http\Controllers\Api\HomeController::class, 'getProductsByCategory']);
+
+
 //Route::get('v1/customer/getAllProductByRestaurantIdWithFilter', [App\Http\Controllers\Api\CustomerController::class, 'getAllProductByRestaurantIdWithFilter']);
 
 Route::prefix('v1/')->group(function () {	

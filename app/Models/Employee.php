@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Permission\Traits\HasRoles;
+//use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\CanResetPassword;
@@ -13,9 +13,10 @@ use App\Notifications\EmployeeResetPasswordNotification;
 class Employee extends Authenticatable implements CanResetPassword
 {
     use HasFactory;
-    use HasRoles;
+    //use HasRoles;
 
     use Notifiable;
+    protected $guard = 'employee';
     
     protected $fillable = ['restaurant_id', 'name', 'email', 'password', 'status','role_id','permission_id'];
     protected $hidden = ['password', 'remember_token'];

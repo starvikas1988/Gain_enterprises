@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Employee;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -25,12 +26,12 @@ class CategoryController extends Controller
         }
 
         $categories = $query->paginate(10);
-        return view('Employee.categories.index', compact('categories'));
+        return view('employee.categories.index', compact('categories'));
     }
 
     public function create()
     {
-        return view('Employee.categories.create');
+        return view('employee.categories.create');
     }
 
     public function store(Request $request)
@@ -64,6 +65,16 @@ class CategoryController extends Controller
         ]);
     
         $category->save();
+
+        $restaurantId = auth()->id(); // Restaurant ID
+        // Insert into restaurant_categories table
+        DB::table('restaurant_categories')->insert([
+            'restaurant_id' => $restaurantId,
+            'category_id' => $category->id,
+            'status' => 'A', // Default to active
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     
         return redirect()->route('employee.categories.index')->with('success', 'Category created successfully.');
     }
@@ -73,7 +84,7 @@ class CategoryController extends Controller
         $employee = auth()->guard('employee')->user();
         $restaurantId = $employee->restaurant_id;
         $category = Category::where('restaurant_id', $restaurantId)->findOrFail($id);
-        return view('Employee.categories.edit', compact('category'));
+        return view('employee.categories.edit', compact('category'));
     }
 
     public function update(Request $request, $id)
@@ -110,6 +121,19 @@ class CategoryController extends Controller
         }
     
         $category->save();
+
+        // Update or Insert into restaurant_categories table
+        DB::table('restaurant_categories')->updateOrInsert(
+            [
+                'restaurant_id' => auth()->id(),
+                'category_id' => $category->id,
+            ],
+            [
+                'status' => 'A',
+                'updated_at' => now(),
+                'created_at' => now(), // Will be ignored if record already exists
+            ]
+        );
     
         return redirect()->route('employee.categories.index')->with('success', 'Category updated successfully.');
     }
@@ -124,6 +148,12 @@ class CategoryController extends Controller
         if ($category->icon && file_exists(public_path($category->icon))) {
             unlink(public_path($category->icon));
         }
+        
+        // Delete from restaurant_categories table
+        DB::table('restaurant_categories')
+        ->where('restaurant_id', Auth::id())
+        ->where('category_id', $category->id)
+        ->delete();
 
         $category->delete();
         

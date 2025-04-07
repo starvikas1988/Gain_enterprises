@@ -59,6 +59,7 @@
                                     <li><a href="<?php echo e(url('admin/'.$menulist->slug)); ?>"><i class="uil-arrow-right"></i> <?php echo e($menulist->name); ?></a></li>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 <?php endif; ?>
+                              
                             </ul>
                         </div>
                     </li>

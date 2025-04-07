@@ -5,6 +5,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
 use Illuminate\Http\Request;
+use App\Models\Restaurant;
+use App\Models\RestaurantTablenumber;
 use App\Models\Admin;
 use App\Models\Role;
 use Auth;
@@ -74,4 +76,70 @@ class HomeController extends Controller
         $admin->save();
         return redirect(route('admin.myprofile'))->withSuccess('Update successfully');
     }
+
+    public function tableNumberIndex()
+    {
+        $tableNumbers = RestaurantTablenumber::with('restaurant')->orderBy('id', 'DESC')->paginate(10);
+        return view('admin.tablenumbers.index', compact('tableNumbers'));
+    }
+
+
+    public function createTableNumber()
+    {
+        $restaurants = Restaurant::where('status', 'A')->get();
+        return view('admin.tablenumbers.create', compact('restaurants'));
+    }
+
+    public function storeTableNumber(Request $request)
+    {
+        $request->validate([
+            'restaurant_id' => 'required|exists:restaurants,id',
+            'table_number' => 'required|string|max:50',
+            'capacity' => 'nullable|integer',
+            'status' => 'required|in:Available,Occupied,Reserved',
+        ]);
+
+        RestaurantTablenumber::create([
+            'restaurant_id' => $request->restaurant_id,
+            'table_number' => $request->table_number,
+            'capacity' => $request->capacity,
+            'status' => $request->status,
+        ]);
+
+        return redirect()->route('admin.table_numbers.index')->with('success', 'Table assigned successfully.');
+    }
+
+    public function editTableNumber($id)
+    {
+        $table = RestaurantTablenumber::findOrFail($id);
+        $restaurants = Restaurant::where('status', 'A')->get();
+        return view('admin.tablenumbers.edit', compact('table', 'restaurants'));
+    }
+
+    public function updateTableNumber(Request $request, $id)
+    {
+        $request->validate([
+            'restaurant_id' => 'required|exists:restaurants,id',
+            'table_number' => 'required|string|max:50',
+            'capacity' => 'nullable|integer',
+            'status' => 'required|in:Available,Occupied,Reserved',
+        ]);
+
+        RestaurantTablenumber::where('id', $id)->update([
+            'restaurant_id' => $request->restaurant_id,
+            'table_number' => $request->table_number,
+            'capacity' => $request->capacity,
+            'status' => $request->status,
+        ]);
+
+        return redirect()->route('admin.table_numbers.index')->with('success', 'Table updated successfully.');
+    }
+
+
+    public function deleteTableNumber($id)
+    {
+        RestaurantTablenumber::where('id', $id)->delete();
+        return redirect()->route('admin.table_numbers.index')->with('success', 'Table entry deleted.');
+    }
+
 }
