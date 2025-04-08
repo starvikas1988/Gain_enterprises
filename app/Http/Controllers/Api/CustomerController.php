@@ -119,9 +119,11 @@ class CustomerController extends Controller
                     $totalGst = 0;
                     $totalDiscount = 0;
                     $subTotal = 0;
+                    
                     foreach($cart as $ct)
                     {   
                         $restaurantData = Restaurant::where('id', $ct->restaurant_id)->first();
+                       // dd($restaurantData);
                         $productData = Product::where('id', $ct->product_id)->where('status', 'A')->first();
                         
                         $amount = $productData->price*$ct->quantity;
@@ -530,79 +532,196 @@ class CustomerController extends Controller
                 return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Invalid payment request!', 'data'=>array()], 200);
         }
     }
-	
-	public function addToCart(Request $request)
-	{
-	    $validator = Validator::make($request->all(), 
+
+    public function addToCart(Request $request)
+    {
+        $validator = Validator::make($request->all(), 
         [
             'restaurantId' => 'required|numeric|exists:restaurants,id',
             'productId' => 'required|numeric|exists:products,id',
             'qty' => 'required|numeric',
-            //'type' => 'required|in:PLUS,MINUS',
+            'table_id' => 'nullable|numeric|exists:restaurant_tablenumbers,id',
         ]);
-    
-        if ($validator->fails())
-            return response()->json(['success' => false, 'errorcode' => '04', 'message' => $validator->errors()->first(), 'data' => []], 200);
-        else
-        {
-            $userId = auth()->user()->id;
-            $restaurantId = $request->input('restaurantId');
-            $productId = $request->input('productId');
-            
-            $restaurant = Restaurant::where('id', $restaurantId)->where('status','A')->where('availability', 'OPEN')->first();
-            $product = Product::where('id', $productId)->where('status', 'A')->first();
-            if($restaurant && $product)
-            {
-                $exist = RestaurantCategory::where('restaurant_id', $restaurantId)->where('category_id', $product->category_id)->count();
-                if($exist)
-                {
-                    $cartData = Cart::where('user_id', $userId)
-                                    ->where('restaurant_id', $restaurantId)
-                                    ->where('product_id', $productId)
-                                    ->first();
-                    if($cartData)
-                    {
-                        $qty = $request->qty;
-                        if($qty > 0)
-                        {
-                            $cartData->product_price = $product->price;
-                            $cartData->qty = $qty;
-                            $cartData->total_amount = ($product->price*$qty);
-                            $cartData->updated_at = date('Y-m-d H:i:s');
-                            $cartData->save();
-                            $message = 'Cart updated successfully.';
-                        }
-                        else
-                            return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Invalid request!', 'data'=>array()], 200);
-                    }
-                    else
-                    {
-                        $cartData = new Cart;
-                        $cartData->user_id = $userId;
-                        $cartData->restaurant_id = $restaurantId;
-                        $cartData->product_id = $productId;
-                        $cartData->product_price = $product->price;
-                        $cartData->qty = $request->qty;
-                        $cartData->total_amount = ($product->price*$request->qty);
-                        $cartData->created_at = date('Y-m-d H:i:s');
-                        $cartData->updated_at = date('Y-m-d H:i:s');
-                        $cartData->save();
-                        $message = 'Cart added successfully.';
-                    }
-                    $userCart = Cart::with('product:id,name,price,image')
-                                ->select('id', 'restaurant_id', 'product_id', 'product_price', 'qty', 'total_amount')
-                                ->where('user_id', $userId)
-                                ->orderBy('id', 'DESC')
-                                ->get();
-                    return response()->json(['success' => true,'errorcode'=>'00','message' => $message, 'data'=>$userCart], 200);
-                }
-                else
-                    return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Product not available to this restaurant!', 'data'=>array()], 200);
-            }
-            else
-                return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Product or Restaurant not active!', 'data'=>array()], 200);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errorcode' => '04',
+                'message' => $validator->errors()->first(),
+                'data' => []
+            ], 200);
         }
-	}
+
+        $userId = auth()->user()->id;
+        $restaurantId = $request->input('restaurantId');
+        $productId = $request->input('productId');
+        $tableId = $request->input('tableId'); // optional
+
+        $restaurant = Restaurant::where('id', $restaurantId)
+            ->where('status', 'A')
+            ->where('availability', 'OPEN')
+            ->first();
+
+        $product = Product::where('id', $productId)
+            ->where('status', 'A')
+            ->first();
+
+        if ($restaurant && $product) {
+            $exist = RestaurantCategory::where('restaurant_id', $restaurantId)
+                ->where('category_id', $product->category_id)
+                ->count();
+
+            if ($exist) {
+                $cartQuery = Cart::where('user_id', $userId)
+                    ->where('restaurant_id', $restaurantId)
+                    ->where('product_id', $productId);
+
+                if ($tableId) {
+                    $cartQuery->where('table_id', $tableId);
+                } else {
+                    $cartQuery->whereNull('table_id');
+                }
+
+                $cartData = $cartQuery->first();
+
+                if ($cartData) {
+                    $qty = $request->qty;
+                    if ($qty > 0) {
+                        $cartData->product_price = $product->price;
+                        $cartData->qty = $qty;
+                        $cartData->total_amount = $product->price * $qty;
+                        $cartData->updated_at = now();
+                        $cartData->save();
+                        $message = 'Cart updated successfully.';
+                    } else {
+                        return response()->json([
+                            'success' => false,
+                            'errorcode' => '03',
+                            'message' => 'Invalid request!',
+                            'data' => []
+                        ], 200);
+                    }
+                } else {
+                    $cartData = new Cart;
+                    $cartData->user_id = $userId;
+                    $cartData->restaurant_id = $restaurantId;
+                    $cartData->product_id = $productId;
+                    $cartData->product_price = $product->price;
+                    $cartData->qty = $request->qty;
+                    $cartData->total_amount = $product->price * $request->qty;
+                    $cartData->created_at = now();
+                    $cartData->updated_at = now();
+                    if ($tableId) {
+                        $cartData->table_id = $tableId;
+                    }
+                    $cartData->save();
+                    $message = 'Cart added successfully.';
+                }
+
+                $userCart = Cart::with('product:id,name,price,image')
+                    ->select('id', 'restaurant_id', 'product_id', 'product_price', 'qty', 'total_amount', 'table_id')
+                    ->where('user_id', $userId)
+                    ->orderBy('id', 'DESC')
+                    ->get();
+
+                return response()->json([
+                    'success' => true,
+                    'errorcode' => '00',
+                    'message' => $message,
+                    'data' => $userCart
+                ], 200);
+
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'errorcode' => '03',
+                    'message' => 'Product not available to this restaurant!',
+                    'data' => []
+                ], 200);
+            }
+        } else {
+            return response()->json([
+                'success' => false,
+                'errorcode' => '03',
+                'message' => 'Product or Restaurant not active!',
+                'data' => []
+            ], 200);
+        }
+    }
+
+	
+	// public function addToCart(Request $request)
+	// {
+	//     $validator = Validator::make($request->all(), 
+    //     [
+    //         'restaurantId' => 'required|numeric|exists:restaurants,id',
+    //         'productId' => 'required|numeric|exists:products,id',
+    //         'qty' => 'required|numeric',
+    //         //'type' => 'required|in:PLUS,MINUS',
+    //     ]);
+    
+    //     if ($validator->fails())
+    //         return response()->json(['success' => false, 'errorcode' => '04', 'message' => $validator->errors()->first(), 'data' => []], 200);
+    //     else
+    //     {
+    //         $userId = auth()->user()->id;
+    //         $restaurantId = $request->input('restaurantId');
+    //         $productId = $request->input('productId');
+            
+    //         $restaurant = Restaurant::where('id', $restaurantId)->where('status','A')->where('availability', 'OPEN')->first();
+    //         $product = Product::where('id', $productId)->where('status', 'A')->first();
+    //         if($restaurant && $product)
+    //         {
+    //             $exist = RestaurantCategory::where('restaurant_id', $restaurantId)->where('category_id', $product->category_id)->count();
+    //             if($exist)
+    //             {
+    //                 $cartData = Cart::where('user_id', $userId)
+    //                                 ->where('restaurant_id', $restaurantId)
+    //                                 ->where('product_id', $productId)
+    //                                 ->first();
+    //                 if($cartData)
+    //                 {
+    //                     $qty = $request->qty;
+    //                     if($qty > 0)
+    //                     {
+    //                         $cartData->product_price = $product->price;
+    //                         $cartData->qty = $qty;
+    //                         $cartData->total_amount = ($product->price*$qty);
+    //                         $cartData->updated_at = date('Y-m-d H:i:s');
+    //                         $cartData->save();
+    //                         $message = 'Cart updated successfully.';
+    //                     }
+    //                     else
+    //                         return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Invalid request!', 'data'=>array()], 200);
+    //                 }
+    //                 else
+    //                 {
+    //                     $cartData = new Cart;
+    //                     $cartData->user_id = $userId;
+    //                     $cartData->restaurant_id = $restaurantId;
+    //                     $cartData->product_id = $productId;
+    //                     $cartData->product_price = $product->price;
+    //                     $cartData->qty = $request->qty;
+    //                     $cartData->total_amount = ($product->price*$request->qty);
+    //                     $cartData->created_at = date('Y-m-d H:i:s');
+    //                     $cartData->updated_at = date('Y-m-d H:i:s');
+    //                     $cartData->save();
+    //                     $message = 'Cart added successfully.';
+    //                 }
+    //                 $userCart = Cart::with('product:id,name,price,image')
+    //                             ->select('id', 'restaurant_id', 'product_id', 'product_price', 'qty', 'total_amount')
+    //                             ->where('user_id', $userId)
+    //                             ->orderBy('id', 'DESC')
+    //                             ->get();
+    //                 return response()->json(['success' => true,'errorcode'=>'00','message' => $message, 'data'=>$userCart], 200);
+    //             }
+    //             else
+    //                 return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Product not available to this restaurant!', 'data'=>array()], 200);
+    //         }
+    //         else
+    //             return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Product or Restaurant not active!', 'data'=>array()], 200);
+    //     }
+	// }
 	
 	public function getCartList(Request $request)
 	{

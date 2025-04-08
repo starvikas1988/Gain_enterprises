@@ -13,7 +13,7 @@ Route::post('v1/customer/mobilevalidate', [App\Http\Controllers\Api\CustomerAuth
 Route::post('v1/getAllCategories', [App\Http\Controllers\Api\HomeController::class, 'getAllCategories']);
 Route::post('v1/getAllRestaurant', [App\Http\Controllers\Api\HomeController::class, 'getAllRestaurant']);
 Route::post('v1/getAllRestaurantByCategoryId', [App\Http\Controllers\Api\HomeController::class, 'getAllRestaurantByCategoryId']);
-Route::get('v1/getAllProductByRestaurantIdWithFilter', [App\Http\Controllers\Api\HomeController::class, 'getAllProductByRestaurantIdWithFilter']);
+Route::post('v1/getAllProductByRestaurantIdWithFilter', [App\Http\Controllers\Api\HomeController::class, 'getAllProductByRestaurantIdWithFilter']);
 Route::post('v1/getAllProductByCategoryId', [App\Http\Controllers\Api\HomeController::class, 'getAllProductByCategoryId']);
 Route::post('v1/searchProductOrRestaurant', [App\Http\Controllers\Api\HomeController::class, 'searchProductOrRestaurant']);
 Route::post('v1/getRecommendedProduct', [App\Http\Controllers\Api\HomeController::class, 'getRecommendedProduct']);
@@ -41,7 +41,7 @@ Route::prefix('v1/')->group(function () {
 	
 		Route::post('customer/addToCart', [App\Http\Controllers\Api\CustomerController::class, 'addToCart']);
 		Route::post('customer/getCartCount', [App\Http\Controllers\Api\CustomerController::class, 'getCartCount']);
-		Route::post('customer/getCartList', [App\Http\Controllers\Api\CustomerController::class, 'getCartList']);
+		Route::get('customer/getCartList', [App\Http\Controllers\Api\CustomerController::class, 'getCartList']);
 		Route::post('customer/deleteCartById', [App\Http\Controllers\Api\CustomerController::class, 'deleteCartById']);
 		Route::post('customer/deleteCartByProductId', [App\Http\Controllers\Api\CustomerController::class, 'deleteCartByProductId']);
 		Route::post('customer/placeOrder', [App\Http\Controllers\Api\CustomerController::class, 'placeOrder']);
@@ -53,7 +53,7 @@ Route::prefix('v1/')->group(function () {
 		Route::post('customer/getOrderList', [App\Http\Controllers\Api\CustomerController::class, 'getOrderList']);
 		Route::post('customer/getOrderDetailById', [App\Http\Controllers\Api\CustomerController::class, 'getOrderDetailById']);
 		
-		Route::get('customer/getAllProductByRestaurantIdWithFilter', [App\Http\Controllers\Api\CustomerController::class, 'getAllProductByRestaurantIdWithFilter']);
+		Route::post('customer/getAllProductByRestaurantIdWithFilter', [App\Http\Controllers\Api\CustomerController::class, 'getAllProductByRestaurantIdWithFilter']);
 		Route::post('customer/getCartProductQuantityByRestaurantId', [App\Http\Controllers\Api\CustomerController::class, 'getCartProductQuantityByRestaurantId']);
 		
 		

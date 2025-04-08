@@ -25,39 +25,107 @@ class CustomerAuthController extends Controller
         
     }
 	
+	// public function customlogin(Request $request)
+	// {
+	// 	$validator = Validator::make($request->all(), 
+    //     [ 
+    //         'mobile' => 'required',
+	// 		'password' => 'required',
+    //     ], [
+    //         'mobile.required' => 'Mobile No is Required',
+	// 		'password.required' => 'Password is Required',
+    //     ]); 
+    //     if($validator->fails()){
+    //         return response()->json(['success'=>false,'errorcode'=>'03','message'=>$validator->messages()->first(),'data'=>array()], 200);
+    //     }		
+	// 	$user = User::where('mobile', $request->mobile)->first();
+	// 	if($user)
+	// 	{
+	// 		if($user->status=='A')
+	// 		{
+	// 	        if(Hash::check($request->password, $user->password))
+	// 	        {
+	// 				$token = $user->createToken('mobile', ['role:customer'])->plainTextToken;
+	// 				$tokendata = array('access_token'=>$token, 'token_type'=>'Bearer');
+	// 				return response()->json(['success'=>true,'errorcode'=>'00', 'message'=>'login successfully','data'=>$tokendata], 200);
+	// 	        }
+	// 	        else
+	// 	           return response()->json(['success'=>false,'errorcode'=>'03','message'=>'Password not matched!','data'=>array()], 200);
+	// 		} 
+	// 		else 
+	// 			return response()->json(['success'=>false,'errorcode'=>'04', 'message'=>'Your account is blocked! contact to support.','data'=>array()], 200);
+	// 	}
+	// 	else 
+	// 		return response()->json(['success'=>false,'errorcode'=>'03','message'=>'No user found with this mobile!','data'=>array()], 200);
+	// }
+
 	public function customlogin(Request $request)
 	{
 		$validator = Validator::make($request->all(), 
-        [ 
-            'mobile' => 'required',
+		[ 
+			'mobile' => 'required',
 			'password' => 'required',
-        ], [
-            'mobile.required' => 'Mobile No is Required',
+		], [
+			'mobile.required' => 'Mobile No is Required',
 			'password.required' => 'Password is Required',
-        ]); 
-        if($validator->fails()){
-            return response()->json(['success'=>false,'errorcode'=>'03','message'=>$validator->messages()->first(),'data'=>array()], 200);
-        }		
-		$user = User::where('mobile', $request->mobile)->first();
-		if($user)
-		{
-			if($user->status=='A')
-			{
-		        if(Hash::check($request->password, $user->password))
-		        {
-					$token = $user->createToken('mobile', ['role:customer'])->plainTextToken;
-					$tokendata = array('access_token'=>$token, 'token_type'=>'Bearer');
-					return response()->json(['success'=>true,'errorcode'=>'00', 'message'=>'login successfully','data'=>$tokendata], 200);
-		        }
-		        else
-		           return response()->json(['success'=>false,'errorcode'=>'03','message'=>'Password not matched!','data'=>array()], 200);
-			} 
-			else 
-				return response()->json(['success'=>false,'errorcode'=>'04', 'message'=>'Your account is blocked! contact to support.','data'=>array()], 200);
+		]); 
+
+		if ($validator->fails()) {
+			return response()->json([
+				'success' => false,
+				'errorcode' => '03',
+				'message' => $validator->messages()->first(),
+				'data' => []
+			], 200);
 		}
-		else 
-			return response()->json(['success'=>false,'errorcode'=>'03','message'=>'No user found with this mobile!','data'=>array()], 200);
+
+		$user = User::where('mobile', $request->mobile)->first();
+
+		if ($user) {
+			if ($user->status == 'A') {
+				if (Hash::check($request->password, $user->password)) {
+					$token = $user->createToken('mobile', ['role:customer'])->plainTextToken;
+
+					$tokendata = [
+						'access_token' => $token,
+						'token_type' => 'Bearer',
+						'user_id' => $user->id, // ✅ Added customer_id here
+						'name' => $user->name ?? '', // optional extras
+						'mobile' => $user->mobile
+					];
+
+					return response()->json([
+						'success' => true,
+						'errorcode' => '00',
+						'message' => 'Login successfully',
+						'data' => $tokendata
+					], 200);
+				} else {
+					return response()->json([
+						'success' => false,
+						'errorcode' => '03',
+						'message' => 'Password not matched!',
+						'data' => []
+					], 200);
+				}
+			} else {
+				return response()->json([
+					'success' => false,
+					'errorcode' => '04',
+					'message' => 'Your account is blocked! Contact support.',
+					'data' => []
+				], 200);
+			}
+		} else {
+			return response()->json([
+				'success' => false,
+				'errorcode' => '03',
+				'message' => 'No user found with this mobile!',
+				'data' => []
+			], 200);
+		}
 	}
+
 	
 	public function customregistration(Request $request)
 	{
