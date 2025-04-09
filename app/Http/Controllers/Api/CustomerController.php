@@ -373,15 +373,15 @@ class CustomerController extends Controller
 	// }
     public function getAllProductByRestaurantIdWithFilter(Request $request)
     {
-       // $userid = auth()->user()->id;
-        $userid =1;
+        $userid = auth()->user()->id;
+      
        
       
         $validator = Validator::make($request->query(),  
         [
             'restaurantId' => 'required',
-            'table_id' => 'required', 
-            'user_id' => 'required', 
+            // 'table_id' => 'required', 
+            // 'user_id' => 'required', 
         ]);
       
         if ($validator->fails()) {

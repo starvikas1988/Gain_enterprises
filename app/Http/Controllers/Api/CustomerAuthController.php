@@ -98,7 +98,7 @@ class CustomerAuthController extends Controller
 						'success' => true,
 						'errorcode' => '00',
 						'message' => 'Login successfully',
-						'data' => $tokendata
+						'data' => $tokendata,
 					], 200);
 				} else {
 					return response()->json([

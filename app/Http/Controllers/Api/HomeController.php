@@ -199,11 +199,12 @@ class HomeController extends Controller
 
     public function getAllProductByRestaurantIdWithFilter(Request $request)
     {
+        
         // Validate POST data instead of query
         $validator = Validator::make($request->all(), [
             'restaurantId' => 'required',
-            'table_id' => 'required', 
-            'user_id' => 'required', 
+            //  'table_id' => 'required', 
+             'user_id' => 'required', 
         ]);
 
         if ($validator->fails()) {
@@ -320,7 +321,7 @@ class HomeController extends Controller
 	
 	public function getRecommendedProduct(Request $request)
 	{
-        $product = Product::where('is_recommend', 'YES')->where('status', 'A')->get(['id', 'name', 'image', 'description', 'price']);
+        $product = Product::where('is_recommend', 'YES')->where('status', 'A')->get(['id', 'name', 'image', 'description', 'price','restaurant_id']);
         if($product->isNotEmpty())
             return response()->json(['success' => true,'errorcode'=>'00','message' => 'data found', 'data'=>$product], 200);
 		else
@@ -399,7 +400,12 @@ class HomeController extends Controller
     public function getCategoriesByTable($table_id)
     {
         // Find the table by ID
-        $table = \App\Models\RestaurantTableNumber::findOrFail($table_id);
+        //$table = \App\Models\RestaurantTableNumber::findOrFail($table_id);
+        $table = DB::table('restaurant_tablenumbers')->where('id', $table_id)->first();
+
+        if (!$table) {
+            abort(404, 'Table not found');
+        }
 
         // Fetch categories based on the restaurant ID from the table
         $categories = \App\Models\Category::where('restaurant_id', $table->restaurant_id)
