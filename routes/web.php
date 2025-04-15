@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Restaurant\KotController;
 use App\Http\Controllers\Restaurant\HomeController;
 use App\Http\Controllers\Restaurant\RoleController;
+use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Restaurant\OrderController;
 use App\Http\Controllers\Restaurant\StockController;
 use App\Http\Controllers\Restaurant\ProductController;
@@ -137,10 +138,22 @@ Route::prefix('admin')->group(function() {
 		
         Route::get('/admincharges', [App\Http\Controllers\Admin\AdminchargeController::class, 'index'])->name('admin.admincharges');
 		// Route::get('/tdscharges', [App\Http\Controllers\Admin\TdschargeController::class, 'index'])->name('admin.tdscharges');
-				
+        Route::resource('attendance', App\Http\Controllers\Admin\AttendanceController::class)
+    ->names([
+        'index'   => 'admin.attendance.index',
+        'create'  => 'admin.attendance.create',
+        'store'   => 'admin.attendance.store',
+        'show'    => 'admin.attendance.show',
+        'edit'    => 'admin.attendance.edit',
+        'update'  => 'admin.attendance.update',
+        'destroy' => 'admin.attendance.destroy',
+    ]);
+        Route::get('attendance-export', [AttendanceController::class, 'export'])->name('admin.attendance.export');	
     });
     
 });
+
+
 
 Route::prefix('restaurant')->group(function () {
     Route::get('/forgot-password', [App\Http\Controllers\Auth\RestaurantForgotPasswordController::class, 'showLinkRequestForm'])->name('restaurant.password.request');
