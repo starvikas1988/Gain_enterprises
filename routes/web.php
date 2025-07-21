@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+
+use App\Services\XeroService;
+
 use App\Http\Controllers\Restaurant\KotController;
 use App\Http\Controllers\Restaurant\HomeController;
 use App\Http\Controllers\Restaurant\RoleController;
@@ -18,6 +21,8 @@ use App\Http\Controllers\Auth\EmployeeResetPasswordController;
 use App\Http\Controllers\Employee\EmployeeDashboardController;
 use App\Http\Controllers\Restaurant\RestaurantTablenumberController;
 
+//use App\Http\Controllers\QrCodeController;
+use App\Http\Controllers\Restaurant\QrCodeController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -39,6 +44,9 @@ Route::get('/clearcache', function() {
     return '<h1>Cache facade value cleared</h1>';
 });
 
+
+
+// Route::get('/qr', [QrCodeController::class, 'index']);
 Route::get('/test-mail', [App\Http\Controllers\HomeController::class, 'testMail'])->name('testMail');
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('index');
@@ -74,15 +82,28 @@ Route::prefix('admin')->group(function() {
         Route::get('/changepassword', [App\Http\Controllers\Admin\HomeController::class, 'changepassword'])->name('admin.changepassword');
         Route::post('/passwordchange', [App\Http\Controllers\Admin\HomeController::class, 'passwordchange'])->name('admin.passwordchange');
 
-        Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('admin.users');
-        Route::get('/add-user', [App\Http\Controllers\Admin\UserController::class, 'create'])->name('admin.user.create');
-        Route::get('/show-user/{id}', [App\Http\Controllers\Admin\UserController::class, 'show'])->name('admin.user.show');
-        Route::post('/add-user', [App\Http\Controllers\Admin\UserController::class, 'store'])->name('admin.user.store');
-        Route::get('/edit-user/{id}', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('admin.user.edit');
-        Route::post('/edit-user/{id}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('admin.user.update');        
-        Route::get('/delete-user/{id}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('admin.user.delete'); 
+   // Driver Routes
+        Route::get('/drivers', [App\Http\Controllers\Admin\DriverController::class, 'index'])->name('admin.drivers');
+        Route::get('/add-driver', [App\Http\Controllers\Admin\DriverController::class, 'create'])->name('admin.driver.create');
+        Route::post('/add-driver', [App\Http\Controllers\Admin\DriverController::class, 'store'])->name('admin.driver.store');
+        Route::get('/show-driver/{id}', [App\Http\Controllers\Admin\DriverController::class, 'show'])->name('admin.driver.show');
+        Route::get('/edit-driver/{id}', [App\Http\Controllers\Admin\DriverController::class, 'edit'])->name('admin.driver.edit');
+        Route::post('/edit-driver/{id}', [App\Http\Controllers\Admin\DriverController::class, 'update'])->name('admin.driver.update');
+        Route::get('/delete-driver/{id}', [App\Http\Controllers\Admin\DriverController::class, 'destroy'])->name('admin.driver.delete');
+
+    
+        Route::get('/stores', [App\Http\Controllers\Admin\StoreController::class, 'index'])->name('admin.stores');
+        Route::get('/add-store', [App\Http\Controllers\Admin\StoreController::class, 'create'])->name('admin.store.create');
+        Route::post('/add-store', [App\Http\Controllers\Admin\StoreController::class, 'store'])->name('admin.store.store');
+        Route::get('/show-store/{id}', [App\Http\Controllers\Admin\StoreController::class, 'show'])->name('admin.store.show');
+        Route::get('/edit-store/{id}', [App\Http\Controllers\Admin\StoreController::class, 'edit'])->name('admin.store.edit');
+        Route::post('/edit-store/{id}', [App\Http\Controllers\Admin\StoreController::class, 'update'])->name('admin.store.update');
+        Route::get('/delete-store/{id}', [App\Http\Controllers\Admin\StoreController::class, 'destroy'])->name('admin.store.delete');
+
+
+
 			        
-		Route::get('/restaurants', [App\Http\Controllers\Admin\RestaurantController::class, 'index'])->name('admin.restaurant');
+		Route::get('/products', [App\Http\Controllers\Admin\RestaurantController::class, 'index'])->name('admin.restaurant');
         Route::get('/add-restaurant', [App\Http\Controllers\Admin\RestaurantController::class, 'create'])->name('admin.restaurant.create');
         Route::get('/show-restaurant/{id}', [App\Http\Controllers\Admin\RestaurantController::class, 'show'])->name('admin.restaurant.show');
         Route::post('/add-restaurant', [App\Http\Controllers\Admin\RestaurantController::class, 'store'])->name('admin.restaurant.store');
@@ -153,236 +174,5 @@ Route::prefix('admin')->group(function() {
     
 });
 
-
-
-Route::prefix('restaurant')->group(function () {
-    Route::get('/forgot-password', [App\Http\Controllers\Auth\RestaurantForgotPasswordController::class, 'showLinkRequestForm'])->name('restaurant.password.request');
-    Route::post('/forgot-password', [App\Http\Controllers\Auth\RestaurantForgotPasswordController::class, 'sendResetLinkEmail'])->name('restaurant.password.email');
-    Route::get('/reset-password/{token}', [App\Http\Controllers\Auth\RestaurantResetPasswordController::class, 'showResetForm'])->name('restaurant.password.reset');
-    // Route::post('/reset-password', [App\Http\Controllers\Auth\RestaurantResetPasswordController::class, 'reset'])->name('restaurant.password.update');
-    Route::post('/password/reset', [App\Http\Controllers\Auth\RestaurantResetPasswordController::class, 'reset'])
-    ->name('restaurant.password.update');
-
-});
-
-Route::prefix('restaurant')->group(function () {
-    Route::get('/login', [App\Http\Controllers\Auth\RestaurantLoginController::class, 'showLoginForm'])->name('restaurant.login');
-    Route::post('/login', [App\Http\Controllers\Auth\RestaurantLoginController::class, 'login'])->name('restaurant.login.submit');
-    Route::get('/logout', [App\Http\Controllers\Auth\RestaurantLoginController::class, 'logout'])->name('restaurant.logout');
-
-    Route::middleware(['auth:restaurant'])->group(function () {
-        Route::get('/dashboard', [App\Http\Controllers\Restaurant\HomeController::class, 'index'])->name('restaurant.dashboard');
-        Route::get('/myprofile', [App\Http\Controllers\Restaurant\HomeController::class, 'myprofile'])->name('restaurant.myprofile');
-        Route::post('/updateprofile', [App\Http\Controllers\Restaurant\HomeController::class, 'updateprofile'])->name('restaurant.updateprofile');
-        Route::get('/changepassword', [App\Http\Controllers\Restaurant\HomeController::class, 'changepassword'])->name('restaurant.changepassword');
-        Route::post('/passwordchange', [App\Http\Controllers\Restaurant\HomeController::class, 'passwordchange'])->name('restaurant.passwordchange');
-
-         // KOT Route
-        Route::get('/orders/kot', [KotController::class, 'index'])->name('restaurant.kot');
-        Route::post('/orders/get-products', [KotController::class, 'getProductsByCategory'])->name('restaurant.getProducts');
-        Route::post('/verify-coupon', [KotController::class, 'verifyCoupon'])->name('coupon.verify');
-        Route::post('/place-order', [KotController::class, 'place_order'])->name('orders.place');
-        Route::get('/generate-token/{id}', [KotController::class, 'generateToken'])->name('restaurant.generateToken');
-
-        Route::get('/orders', [OrderController::class, 'index'])->name('restaurant.orders');
-        Route::get('/orders/{id}', [OrderController::class, 'show'])->name('restaurant.orders.view');
-        Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->name('restaurant.orders.delete');
-
-        //Route::get('/tables', [RestaurantTablenumberController::class, 'index'])->name('restaurant.tables.index');
-        Route::resource('/tables', App\Http\Controllers\Restaurant\RestaurantTablenumberController::class)
-        ->names([
-            'index' => 'restaurant.tables.index',
-            'create' => 'restaurant.tables.create',
-            'store' => 'restaurant.tables.store',
-            'show' => 'restaurant.tables.show',
-            'edit' => 'restaurant.tables.edit',
-            'update' => 'restaurant.tables.update',
-            'destroy' => 'restaurant.tables.destroy',
-        ]);
-
-        Route::resource('/categories', CategoryController::class)
-        ->names([
-            'index' => 'restaurant.categories.index',
-            'create' => 'restaurant.categories.create',
-            'store' => 'restaurant.categories.store',
-            'show' => 'restaurant.categories.show',
-            'edit' => 'restaurant.categories.edit',
-            'update' => 'restaurant.categories.update',
-            'destroy' => 'restaurant.categories.destroy',
-        ]);
-
-        Route::resource('/products', ProductController::class)
-        ->names([
-            'index' => 'restaurant.products.index',
-            'create' => 'restaurant.products.create',
-            'store' => 'restaurant.products.store',
-            'show' => 'restaurant.products.show',
-            'edit' => 'restaurant.products.edit',
-            'update' => 'restaurant.products.update',
-            'destroy' => 'restaurant.products.destroy',
-        ]);
-
-        Route::resource('/stocks', App\Http\Controllers\Restaurant\StockController::class)
-        ->names([
-            'index' => 'restaurant.stocks.index',
-        ]);
-
-        // Route::post('/restaurant/stocks/uploadBulk', [StockController::class, 'uploadBulk'])->name('restaurant.stocks.uploadBulk');
-
-
-        // Route::delete('/restaurant/stocks/{id}', [StockController::class, 'destroy'])->name('restaurant.stocks.destroy');
-        Route::get('/restaurant/stocks/downloadSample', [StockController::class, 'downloadSample'])->name('restaurant.stocks.downloadSample');
-
-        Route::get('/stocks/create', [StockController::class, 'create'])->name('restaurant.stocks.create');
-        // Route::post('/restaurant/stocks/store', [StockController::class, 'store'])->name('restaurant.stocks.store');
-       
-        Route::get('/stocks/products/{categoryId}', [StockController::class, 'getProductsByCategory'])
-        ->name('restaurant.stocks.getProductsByCategory');
-
-        Route::post('/stocks/uploadBulk', [StockController::class, 'uploadBulk'])->name('restaurant.stocks.uploadBulk');
-        Route::delete('/stocks/{id}', [StockController::class, 'destroy'])->name('restaurant.stocks.destroy');
-
-        Route::post('/stocks/updateBulk', [StockController::class, 'updateBulk'])->name('restaurant.stocks.updateBulk');
-       
-        // Route::get('/stocks/downloadSample', [StockController::class, 'downloadSample'])->name('restaurant.stocks.downloadSample');
-        Route::post('/stocks/store', [StockController::class, 'store'])->name('restaurant.stocks.store');
-
-
-        Route::post('/orders/update-status', [HomeController::class, 'updateOrderStatus'])->name('restaurant.orders.updateStatus');
-        Route::post('/orders/change-status', [HomeController::class, 'changeOrderStatus'])->name('restaurant.orders.changeStatus');
-
-        Route::get('/todays_stock', [StockController::class, 'todaysStock'])->name('restaurant.stocks.todays_stock');
-
-        // Route::get('/dashboard', function () {
-        //     return view('restaurant.dashboard');
-        // })->name('restaurant.dashboard');
-    });
-});
-
-// Delivery Purchases Management
-Route::prefix('restaurant/purchases')->middleware('auth:restaurant')->group(function () {
-    Route::get('/dine_in', [PurchaseController::class, 'dineInPurchases'])->name('restaurant.purchases.dine_in');
-    Route::get('/home_delivery', [PurchaseController::class, 'homeDeliveryPurchases'])->name('restaurant.purchases.home_delivery');
-
-    // Common Edit, Update, and Delete routes for both
-    Route::get('/edit/{id}', [PurchaseController::class, 'edit'])->name('restaurant.purchases.edit');
-    Route::post('/update/{id}', [PurchaseController::class, 'update'])->name('restaurant.purchases.update');
-    Route::delete('/delete/{id}', [PurchaseController::class, 'destroy'])->name('restaurant.purchases.delete');
-});
-
-
-Route::middleware(['auth:restaurant'])->prefix('restaurant')->name('restaurant.')->group(function () {
-    Route::resource('employees', App\Http\Controllers\Restaurant\EmployeeController::class);
-});
-Route::middleware(['auth:restaurant'])->prefix('restaurant')->name('restaurant.')->group(function () {
-    Route::resource('roles', App\Http\Controllers\Restaurant\RoleController::class);
-    Route::resource('permissions', App\Http\Controllers\Restaurant\PermissionController::class);
-});
-
-Route::prefix('employee')->name('employee.')->group(function () {
-    Route::get('/login', [App\Http\Controllers\Auth\EmployeeLoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [App\Http\Controllers\Auth\EmployeeLoginController::class, 'login'])->name('login.submit');
-    Route::get('/logout', [App\Http\Controllers\Auth\EmployeeLoginController::class, 'logout'])->name('logout');
-
-    Route::middleware('auth:employee')->group(function () {
-        Route::get('/dashboard', [App\Http\Controllers\Employee\HomeController::class, 'index'])->name('dashboard');
-        Route::get('/myprofile', [App\Http\Controllers\Employee\HomeController::class, 'myprofile'])->name('myprofile');
-        Route::post('/updateprofile', [App\Http\Controllers\Employee\HomeController::class, 'updateprofile'])->name('updateprofile');
-        Route::get('/changepassword', [App\Http\Controllers\Employee\HomeController::class, 'changepassword'])->name('changepassword');
-        Route::post('/passwordchange', [App\Http\Controllers\Employee\HomeController::class, 'passwordchange'])->name('passwordchange');
-
-        Route::get('/orders/kot', [App\Http\Controllers\Employee\KotController::class, 'index'])->name('kot');
-        Route::post('/orders/get-products', [App\Http\Controllers\Employee\KotController::class, 'getProductsByCategory'])->name('getProducts');
-        Route::post('/verify-coupon', [App\Http\Controllers\Employee\KotController::class, 'verifyCoupon'])->name('coupon.verify');
-        Route::post('/place-order', [App\Http\Controllers\Employee\KotController::class, 'placeOrder'])->name('orders.place');
-        Route::get('/generate-token/{id}', [App\Http\Controllers\Employee\KotController::class, 'generateToken'])->name('generateToken');
-
-        Route::get('/orders', [App\Http\Controllers\Employee\OrderController::class, 'index'])->name('orders');
-        Route::get('/orders/{id}', [App\Http\Controllers\Employee\OrderController::class, 'show'])->name('orders.view');
-        Route::delete('/orders/{id}', [App\Http\Controllers\Employee\OrderController::class, 'destroy'])->name('orders.delete');
-
-        Route::resource('/tables', App\Http\Controllers\Employee\RestaurantTablenumberController::class)
-        ->names([
-            'index' => 'tables.index',
-            'create' => 'tables.create',
-            'store' => 'tables.store',
-            'show' => 'tables.show',
-            'edit' => 'tables.edit',
-            'update' => 'tables.update',
-            'destroy' => 'tables.destroy',
-        ]);
-
-        Route::resource('/categories', App\Http\Controllers\Employee\CategoryController::class)
-        ->names([
-            'index' => 'categories.index',
-            'create' => 'categories.create',
-            'store' => 'categories.store',
-            'show' => 'categories.show',
-            'edit' => 'categories.edit',
-            'update' => 'categories.update',
-            'destroy' => 'categories.destroy',
-        ]);
-
-        Route::resource('/products', App\Http\Controllers\Employee\ProductController::class)
-        ->names([
-            'index' => 'products.index',
-            'create' => 'products.create',
-            'store' => 'products.store',
-            'show' => 'products.show',
-            'edit' => 'products.edit',
-            'update' => 'products.update',
-            'destroy' => 'products.destroy',
-        ]);
-
-
-        Route::get('/stocks', [App\Http\Controllers\Employee\StockController::class, 'index'])->name('stocks.index');
-        Route::get('/employee/stocks/downloadSample', [App\Http\Controllers\Employee\StockController::class, 'downloadSample'])->name('stocks.downloadSample');
-
-        Route::get('/stocks/create', [App\Http\Controllers\Employee\StockController::class, 'create'])->name('stocks.create');
-     
-       
-        Route::get('/stocks/products/{categoryId}', [App\Http\Controllers\Employee\StockController::class, 'getProductsByCategory'])
-        ->name('stocks.getProductsByCategory');
-
-        Route::post('/stocks/uploadBulk', [App\Http\Controllers\Employee\StockController::class, 'uploadBulk'])->name('stocks.uploadBulk');
-        Route::delete('/stocks/{id}', [App\Http\Controllers\Employee\StockController::class, 'destroy'])->name('stocks.destroy');
-
-        Route::post('/stocks/updateBulk', [App\Http\Controllers\Employee\StockController::class, 'updateBulk'])->name('stocks.updateBulk');
-       
-   
-        Route::post('/stocks/store', [App\Http\Controllers\Employee\StockController::class, 'store'])->name('stocks.store');
-
-
-        Route::post('/orders/update-status', [App\Http\Controllers\Employee\HomeController::class, 'updateOrderStatus'])->name('orders.updateStatus');
-        Route::post('/orders/change-status', [App\Http\Controllers\Employee\HomeController::class, 'changeOrderStatus'])->name('orders.changeStatus');
-
-        Route::get('/todays_stock', [App\Http\Controllers\Employee\StockController::class, 'todaysStock'])->name('stocks.todays_stock');
-    });
-});
-
-Route::prefix('employee')->group(function () {
-    Route::get('/forgot-password', [App\Http\Controllers\Auth\EmployeeForgotPasswordController::class, 'showLinkRequestForm'])->name('employee.password.request');
-    Route::post('/forgot-password', [App\Http\Controllers\Auth\EmployeeForgotPasswordController::class, 'sendResetLinkEmail'])->name('employee.password.email');
-    Route::get('/reset-password/{token}', [App\Http\Controllers\Auth\EmployeeResetPasswordController::class, 'showResetForm'])->name('employee.password.reset');
-    Route::post('/password/reset', [App\Http\Controllers\Auth\EmployeeResetPasswordController::class, 'reset'])
-    ->name('employee.password.update');
-
-});
-
-Route::prefix('employee/purchases')->middleware('auth:employee')->group(function () {
-    Route::get('/dine_in', [App\Http\Controllers\Employee\PurchaseController::class, 'dineInPurchases'])->name('employee.purchases.dine_in');
-    Route::get('/home_delivery', [App\Http\Controllers\Employee\PurchaseController::class, 'homeDeliveryPurchases'])->name('employee.purchases.home_delivery');
-
-    // Common Edit, Update, and Delete routes for both
-    Route::get('/edit/{id}', [App\Http\Controllers\Employee\PurchaseController::class, 'edit'])->name('employee.purchases.edit');
-    Route::post('/update/{id}', [App\Http\Controllers\Employee\PurchaseController::class, 'update'])->name('employee.purchases.update');
-    Route::delete('/delete/{id}', [App\Http\Controllers\Employee\PurchaseController::class, 'destroy'])->name('employee.purchases.delete');
-});
-
-// Route::prefix('employee')->name('employee.')->middleware('auth:employee')->group(function () {
-//     Route::get('/test-auth', function () {
-//         return response()->json(['user' => auth()->guard('employee')->user()]);
-//     });
-// });
 
 

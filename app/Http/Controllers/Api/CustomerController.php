@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 use App\Http\Controllers\Controller;
 use Laravel\Sanctum\HasApiTokens; 
+
 use Route;
 use Image;
 use File;
@@ -36,13 +37,47 @@ use DB;
 class CustomerController extends Controller
 {
     public $token = true;
-	public function __construct()
+    protected $key;
+    protected $secret;
+    protected $auth;
+
+    public function __construct()
     {	
-		if(Route::middleware('auth:sanctum')){
-			return response()->json(['success' => false,'errorcode'=>'05','message' => 'Unauthorized','data'=>array()], 401);
-		}		
+        $this->key    = config('services.razorpay.key');
+        $this->secret = config('services.razorpay.secret');
+        $this->auth   = base64_encode("{$this->key}:{$this->secret}");
+      
+       
+        if(Route::middleware('auth:sanctum')){
+            return response()->json(['success' => false,'errorcode'=>'05','message' => 'Unauthorized','data'=>array()], 401);
+        }		
     }
 	
+
+    // public function verifyCoupon($code, $totalAmount)
+    // {
+    //     $coupon = Coupon::where('code', $code)
+    //                     ->where('status', 'A')
+    //                     ->where('start_date', '<=', date('Y-m-d'))
+    //                     ->where('end_date', '>=', date('Y-m-d'))
+    //                     ->first();
+    //     if($coupon)
+    //     {
+    //         if($coupon->min_order_value <= $totalAmount)
+    //         {
+    //             $discountAmount = 0;
+    //             if($coupon->type == 'FLAT')
+    //                 $discountAmount = $coupon->discount_amount;
+    //             else
+    //                 $discountAmount = ($totalAmount * $coupon->discount_amount)/100;
+    //             return response()->json(['success' => true,'errorcode'=>'00','message' => 'Coupon applied successfully.', 'data'=>[['code'=>$code, 'discountAmount'=>$discountAmount]]], 200);
+    //         }
+    //         else
+    //             return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Minimum order value not matched!', 'data'=>array()], 200);
+    //     }
+    //     else
+    //         return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Invalid coupon code!', 'data'=>array()], 200);
+    // }
 	public function profile()  
 	{
 		$customer = User::where('id', auth()->user()->id)->first(['id', 'name', 'mobile', 'gender', 'dob', 'email', 'balance', 'profileimg', 'created_at']);
@@ -222,6 +257,7 @@ class CustomerController extends Controller
                         'amount'   => $amount * 100, // 100 $amount * 100
                         'currency' => 'INR',
                         'receipt'  => 'GAINENTERPRISES PAYMENTS',
+                        'payment_capture' => 1,
                         'notes'    => [
                             'notes_key_1' => $payment->id,
                             'notes_key_2' => ''
@@ -240,8 +276,8 @@ class CustomerController extends Controller
                       CURLOPT_CUSTOMREQUEST => 'POST',
                       CURLOPT_POSTFIELDS =>json_encode($paymentData, true),
                       CURLOPT_HTTPHEADER => array(
-                        'Content-Type: application/json',
-                        'Authorization: Basic cnpwX3Rlc3RfcThOTm9sY0NJNTNWZG86M1hYbm9Ta0ZqdTRiczRDc2pvMThNWnha'
+                       'Authorization: Basic ' . $this->auth,
+                        "Content-Type: application/json"
                       ),
                     ));
                     
@@ -487,7 +523,8 @@ class CustomerController extends Controller
                       CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                       CURLOPT_CUSTOMREQUEST => 'GET',
                       CURLOPT_HTTPHEADER => array(
-                        'Authorization: Basic cnpwX3Rlc3RfcThOTm9sY0NJNTNWZG86M1hYbm9Ta0ZqdTRiczRDc2pvMThNWnha'
+                        'Authorization: Basic ' . $this->auth,
+                        "Content-Type: application/json"
                       ),
                     ));
                     
@@ -511,6 +548,7 @@ class CustomerController extends Controller
 								{
 									Order::where('id', $orderId)
 									    ->update(['order_status'=>'Processing', 'payment_status'=>'SUCCESS', 'updated_at'=>date('Y-m-d H:i:s')]);
+                                        Cart::where('user_id', $userId)->delete();
 									return response()->json(['success' => true,'errorcode'=>'00','message' => 'Your payment was successful.', 'data'=>[]], 200);
 								}
 								else
@@ -819,6 +857,21 @@ class CustomerController extends Controller
         else
         {
             $cart = json_decode($request->input('cart'));
+            
+            $tableId = $request->input('tableId');
+            // echo $tableId;die;
+            // if($tableId)
+            // {
+            //     $cart = Cart::where('user_id', $userId)
+            //                 ->where('table_id', $tableId)
+            //                 ->get();
+            // }
+            // else
+            // {
+            //     $cart = Cart::where('user_id', $userId)->get();
+            // }
+            // echo "<pre>";
+            // print_r($cart);die;
             $flag = 1;
             if($cart)
             {
@@ -892,7 +945,7 @@ class CustomerController extends Controller
                     
                     // if($request->addressId == 'null')
                     //     $request->addressId = 
-                    
+                    $deliveryCharge = $request->input('deliveryCharge', 0); // safely get from request (default 0)
                     $order = new Order;
                     $order->user_id = $userId;
                     $order->address_id = ($request->addressId ? $request->addressId :NULL);
@@ -900,7 +953,9 @@ class CustomerController extends Controller
                     $order->restaurant_id = $request->restaurant_id;
                     $order->table_id = $defaultTableId;
                     $order->created_by = $request->created_by;
-                    $order->total_amount = $totalAmount - $discountAmount;
+                    $order->total_amount = ($totalAmount - $discountAmount) + $deliveryCharge;
+                    $order->delivery_charge = $deliveryCharge; // save it if you have a field for it
+                    // $order->total_amount = $totalAmount - $discountAmount;
                     $order->total_discount = $discountAmount;
                     $order->coupon_code = $couponCode;
                     $order->coupon_amount = $discountAmount;
@@ -1187,6 +1242,26 @@ class CustomerController extends Controller
 		        return response()->json(['success' => false,'errorcode'=>'03', 'message'=>'Invalid address id!', 'data'=>array()], 200);	
 		}
 	}
+
+     public function deleteAccount($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found.'
+            ], 404);
+        }
+
+        $user->delete(); // Soft delete
+
+        return response()->json([
+            'status' => true,
+            'message' => 'User account deleted successfully.'
+        ], 200);
+    }
+
 	
 	public function updateprofile(Request $request)
 	{

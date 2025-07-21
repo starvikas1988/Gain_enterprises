@@ -13,6 +13,8 @@
         <link href="{{ asset('public/backend/assets/css/vendor/jquery-jvectormap-1.2.2.css') }}" rel="stylesheet" type="text/css" />
         <!-- third party css end -->
         <!-- App css -->
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
         <link href="{{ asset('public/backend/assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
         <link href="{{ asset('public/backend/assets/css/app.min.css') }}" rel="stylesheet" type="text/css" id="light-style" />
         <link href="{{ asset('public/backend/assets/css/app-dark.min.css') }}" rel="stylesheet" type="text/css" id="dark-style" />

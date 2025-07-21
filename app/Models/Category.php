@@ -20,7 +20,9 @@ class Category extends Model
     
     public function getIconAttribute($value)
     {
-        return 'https://caterer.gainenterprises.in/backend/' . $value;
+       
+        return 'http://localhost/shopify_sports_plugin/' . $value;
+       // return 'https://caterer.gainenterprises.in/backend/' . $value;
     }
     
     public function restaurants()

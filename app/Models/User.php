@@ -7,14 +7,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    
-    protected $fillable = [];
+     use SoftDeletes;
+
+    protected $dates = ['deleted_at'];
+
+    //protected $fillable = [];
+    protected $fillable = [
+        'name', 'email', 'mobile', 'balance', 'profileimg', 'device_id',
+        'gender', 'dob', 'address', 'password', 'status'
+    ];
 
     protected $hidden = [
         'password',

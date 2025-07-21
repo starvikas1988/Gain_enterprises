@@ -29,7 +29,7 @@ class Handler extends ExceptionHandler
 
     protected function unauthenticated($request, AuthenticationException $exception)
     {
-        if ($request->expectsJson()) {
+        if ($request->expectsJson() || $request->is('api/*')) {
 			//return response()->json(['success' => false, 'message'=>'Unauthenticated','data'=>array()], 401);
             return response()->json(['error' => 'Unauthenticated.'], 401);
         }
@@ -44,8 +44,8 @@ class Handler extends ExceptionHandler
            		break;
 
          	default:
-           		$login='login';
-           		break;
+           		 return response()->json(['error' => 'Unauthenticated.'], 401); 
+           		//break;
        	}
         return redirect()->guest(route($login));
     }

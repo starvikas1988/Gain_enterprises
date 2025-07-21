@@ -14,6 +14,13 @@ return [
     |
     */
 
+    'xero' => [
+    'client_id' => env('XERO_CLIENT_ID'),
+    'client_secret' => env('XERO_CLIENT_SECRET'),
+    'redirect_uri' => env('XERO_REDIRECT_URI'),
+],
+
+
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),
         'secret' => env('MAILGUN_SECRET'),
@@ -29,5 +36,10 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    'razorpay' => [
+    'key'    => env('RAZORPAY_KEY'),
+    'secret' => env('RAZORPAY_SECRET'),
+],
+
 
 ];
