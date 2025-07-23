@@ -9,11 +9,20 @@ class Store extends Model
 {
     use HasFactory;
     protected $fillable = [
-    'name',
-    'location',
-    'email',
-    'phone',
-    'status',
-];
+        'name',
+        'location',
+        'email',
+        'phone',
+        'status',
+    ];
+
+     public function routes()
+    {
+        return $this->belongsToMany(Route::class)
+            ->withPivot('stop_order')
+            ->withTimestamps();
+    }
+
+
 
 }

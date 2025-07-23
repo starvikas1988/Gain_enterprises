@@ -100,6 +100,19 @@ Route::prefix('admin')->group(function() {
         Route::post('/edit-store/{id}', [App\Http\Controllers\Admin\StoreController::class, 'update'])->name('admin.store.update');
         Route::get('/delete-store/{id}', [App\Http\Controllers\Admin\StoreController::class, 'destroy'])->name('admin.store.delete');
 
+        Route::get('/routes', [App\Http\Controllers\Admin\DriveRouteController::class, 'index'])->name('admin.drive_route');
+
+        Route::get('/add-route', [App\Http\Controllers\Admin\DriveRouteController::class, 'create'])->name('admin.drive_route.create');
+        Route::post('/add-route', [App\Http\Controllers\Admin\DriveRouteController::class, 'store'])->name('admin.drive_route.store');
+
+        Route::get('/show-route/{id}', [App\Http\Controllers\Admin\DriveRouteController::class, 'show'])->name('admin.drive_route.show');
+
+        Route::get('/edit-route/{id}', [App\Http\Controllers\Admin\DriveRouteController::class, 'edit'])->name('admin.drive_route.edit');
+        Route::post('/edit-route/{id}', [App\Http\Controllers\Admin\DriveRouteController::class, 'update'])->name('admin.drive_route.update');
+
+        Route::get('/delete-route/{id}', [App\Http\Controllers\Admin\DriveRouteController::class, 'destroy'])->name('admin.drive_route.delete');
+
+
 
 
 			        

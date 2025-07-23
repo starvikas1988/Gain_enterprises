@@ -30,4 +30,9 @@ class Driver extends Authenticatable
         'vehicle_type',
     ];
 
+    public function routes()
+    {
+        return $this->hasMany(Route::class);
+    }
+
 }

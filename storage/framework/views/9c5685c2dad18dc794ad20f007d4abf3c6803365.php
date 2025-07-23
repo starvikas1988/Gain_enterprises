@@ -12,7 +12,7 @@
 <!-- end page title -->
 
 <?php
-    $users = App\Models\User::count();
+    $users = App\Models\Driver::count();
 ?>
 
 <div class="row">
@@ -26,7 +26,7 @@
                         <div class="float-end">
                             <i class="mdi mdi-account-multiple widget-icon"></i>
                         </div>
-                        <h5 class="text-muted fw-normal mt-0" title="Number of Customers">Total Customers</h5>
+                        <h5 class="text-muted fw-normal mt-0" title="Number of Customers">Total Drivers</h5>
                         <h3 class="mt-3 mb-3"><?php echo e($users); ?></h3>
                     </div> <!-- end card-body-->
                 </div> <!-- end card-->
