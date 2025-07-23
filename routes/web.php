@@ -100,6 +100,20 @@ Route::prefix('admin')->group(function() {
         Route::post('/edit-store/{id}', [App\Http\Controllers\Admin\StoreController::class, 'update'])->name('admin.store.update');
         Route::get('/delete-store/{id}', [App\Http\Controllers\Admin\StoreController::class, 'destroy'])->name('admin.store.delete');
 
+       
+
+        Route::get('/trips', [App\Http\Controllers\Admin\TripController::class, 'index'])->name('admin.trips');
+        Route::get('/trip/create', [App\Http\Controllers\Admin\TripController::class, 'create'])->name('admin.trip.create');
+        Route::post('/trip/store', [App\Http\Controllers\Admin\TripController::class, 'store'])->name('admin.trip.store');
+        Route::get('/trip/edit/{id}', [App\Http\Controllers\Admin\TripController::class, 'edit'])->name('admin.trip.edit');
+        Route::post('/trip/update/{id}', [App\Http\Controllers\Admin\TripController::class, 'update'])->name('admin.trip.update');
+        Route::get('/trip/show/{id}', [App\Http\Controllers\Admin\TripController::class, 'show'])->name('admin.trip.show');
+        Route::get('/trip/delete/{id}', [App\Http\Controllers\Admin\TripController::class, 'destroy'])->name('admin.trip.delete');
+
+        Route::post('/trip/update-store-time', [App\Http\Controllers\Admin\TripController::class, 'updateStoreTiming'])->name('admin.trip.update_time');
+        Route::post('/trip/complete/{id}', [App\Http\Controllers\Admin\TripController::class, 'completeTrip'])->name('admin.trip.complete');
+
+
         Route::get('/routes', [App\Http\Controllers\Admin\DriveRouteController::class, 'index'])->name('admin.drive_route');
 
         Route::get('/add-route', [App\Http\Controllers\Admin\DriveRouteController::class, 'create'])->name('admin.drive_route.create');
