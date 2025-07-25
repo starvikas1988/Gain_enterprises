@@ -103,15 +103,32 @@ Route::prefix('admin')->group(function() {
        
 
         Route::get('/trips', [App\Http\Controllers\Admin\TripController::class, 'index'])->name('admin.trips');
-        Route::get('/trip/create', [App\Http\Controllers\Admin\TripController::class, 'create'])->name('admin.trip.create');
-        Route::post('/trip/store', [App\Http\Controllers\Admin\TripController::class, 'store'])->name('admin.trip.store');
-        Route::get('/trip/edit/{id}', [App\Http\Controllers\Admin\TripController::class, 'edit'])->name('admin.trip.edit');
-        Route::post('/trip/update/{id}', [App\Http\Controllers\Admin\TripController::class, 'update'])->name('admin.trip.update');
-        Route::get('/trip/show/{id}', [App\Http\Controllers\Admin\TripController::class, 'show'])->name('admin.trip.show');
-        Route::get('/trip/delete/{id}', [App\Http\Controllers\Admin\TripController::class, 'destroy'])->name('admin.trip.delete');
+        Route::get('/add-trip', [App\Http\Controllers\Admin\TripController::class, 'create'])->name('admin.trip.create');
+        Route::post('/add-trip', [App\Http\Controllers\Admin\TripController::class, 'store'])->name('admin.trip.store');
+        Route::get('/edit-trip/{id}', [App\Http\Controllers\Admin\TripController::class, 'edit'])->name('admin.trip.edit');
+        Route::post('/edit-trip/{id}', [App\Http\Controllers\Admin\TripController::class, 'update'])->name('admin.trip.update');
+        Route::get('/show-trip/{id}', [App\Http\Controllers\Admin\TripController::class, 'show'])->name('admin.trip.show');
+        Route::get('/delete-trip/{id}', [App\Http\Controllers\Admin\TripController::class, 'destroy'])->name('admin.trip.delete');
 
-        Route::post('/trip/update-store-time', [App\Http\Controllers\Admin\TripController::class, 'updateStoreTiming'])->name('admin.trip.update_time');
-        Route::post('/trip/complete/{id}', [App\Http\Controllers\Admin\TripController::class, 'completeTrip'])->name('admin.trip.complete');
+        // Manage trip timing (GET form page)
+        Route::get('/trip-manage/{id}', [App\Http\Controllers\Admin\TripController::class, 'manageTimings'])->name('admin.trip.manage');
+
+        // Save timing updates (POST)
+        Route::post('/trip-save-timings/{id}', [App\Http\Controllers\Admin\TripController::class, 'saveTimings'])->name('admin.trip.save_timings');
+
+        Route::post('/trip-toggle-admin-status/{id}', [App\Http\Controllers\Admin\TripController::class, 'toggleAdminStatus'])->name('admin.trip.toggle_admin_status');
+        Route::post('/trip-toggle-driver-status/{id}', [App\Http\Controllers\Admin\TripController::class, 'toggleDriverStatus'])->name('admin.trip.toggle_driver_status');
+
+
+        // Route::post('/trip-complete/{id}', [App\Http\Controllers\Admin\TripController::class, 'markCompleteByAdmin'])->name('admin.trip.complete');
+
+        // Route::post('/driver-trip-confirm/{id}', [App\Http\Controllers\Admin\TripController::class, 'confirmByDriver'])->name('admin.trip.confirm_by_driver');
+
+
+
+
+        // Route::post('/trip/update-store-time', [App\Http\Controllers\Admin\TripController::class, 'updateStoreTiming'])->name('admin.trip.update_time');
+        // Route::post('/trip/complete/{id}', [App\Http\Controllers\Admin\TripController::class, 'completeTrip'])->name('admin.trip.complete');
 
 
         Route::get('/routes', [App\Http\Controllers\Admin\DriveRouteController::class, 'index'])->name('admin.drive_route');

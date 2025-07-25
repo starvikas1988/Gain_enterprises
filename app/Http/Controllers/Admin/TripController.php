@@ -97,38 +97,133 @@ class TripController extends Controller
         return view('admin.trip.edit', compact('trip', 'drivers', 'routes'));
     }
 
-
-    public function updateStoreTime(Request $request)
+    public function manageTimings($id)
     {
-        $request->validate([
-            'trip_id' => 'required|exists:trips,id',
-            'store_id' => 'required|exists:stores,id',
-            'arrival_time' => 'nullable|date',
-            'load_time' => 'nullable|date',
-            'departure_time' => 'nullable|date',
-        ]);
-
-        Trip::findOrFail($request->trip_id)
-            ->stores()
-            ->updateExistingPivot($request->store_id, [
-                'arrival_time' => $request->arrival_time,
-                'load_time' => $request->load_time,
-                'departure_time' => $request->departure_time,
-            ]);
-
-        return back()->withSuccess('Store timings updated.');
+        $trip = Trip::with('stores')->findOrFail($id);
+        return view('admin.trip.manage', compact('trip'));
     }
 
-    public function complete($id)
+    public function saveTimings(Request $request, $id)
     {
         $trip = Trip::findOrFail($id);
-        $trip->update([
-            'completed_at' => now(),
-            'admin_status' => 'completed',
-        ]);
 
-        return back()->withSuccess('Trip marked as completed.');
+        foreach ($request->store_ids as $storeId) {
+            $trip->stores()->updateExistingPivot($storeId, [
+                'arrival_time' => $request->arrival_time[$storeId] ?? null,
+                'load_time' => $request->load_time[$storeId] ?? null,
+                'departure_time' => $request->departure_time[$storeId] ?? null,
+            ]);
+        }
+
+        return redirect()->route('admin.trips')->withSuccess('Trip timings updated successfully.');
     }
+
+    public function toggleAdminStatus($id)
+    {
+        $trip = Trip::findOrFail($id);
+        $trip->admin_status = $trip->admin_status === 'completed' ? 'in_progress' : 'completed';
+
+        // If both are done, set completed_at
+        $trip->completed_at = ($trip->admin_status === 'completed' && $trip->driver_status === 'confirmed') ? now() : null;
+
+        $trip->save();
+        return back()->with('success', 'Admin status toggled.');
+    }
+
+    public function toggleDriverStatus($id)
+    {
+        $trip = Trip::findOrFail($id);
+        $trip->driver_status = $trip->driver_status === 'confirmed' ? 'pending' : 'confirmed';
+
+        // If both are done, set completed_at
+        $trip->completed_at = ($trip->admin_status === 'completed' && $trip->driver_status === 'confirmed') ? now() : null;
+
+        $trip->save();
+        return back()->with('success', 'Driver status toggled.');
+    }
+
+
+    // public function markCompleteByAdmin($id)
+    // {
+    //     $trip = Trip::findOrFail($id);
+
+    //     $trip->admin_status = 'completed';
+    //     if ($trip->driver_status === 'confirmed') {
+    //         $trip->completed_at = now();
+    //     }
+    //     $trip->save();
+
+    //     return back()->withSuccess('Trip marked as completed by admin.');
+    // }
+
+    // public function confirmByDriver($id)
+    // {
+    //     // $trip = Trip::where('id', $id)
+    //     //             ->where('driver_id', auth()->id())
+    //     //             ->firstOrFail();
+
+    //     $trip = Trip::where('id', $id)->firstOrFail();
+
+    //     $trip->driver_status = 'confirmed';
+
+    //     if ($trip->admin_status === 'completed') {
+    //         $trip->completed_at = now();
+    //     }
+
+    //     $trip->save();
+
+    //     return redirect()->back()->with('success', 'Trip confirmed successfully.');
+    // }
+
+
+    // public function confirmByDriver(Request $request, $id)
+    // {
+    //     $trip = Trip::where('id', $id)->where('driver_id', auth()->id())->firstOrFail();
+
+    //     $trip->driver_status = 'confirmed';
+    //     if ($trip->admin_status === 'completed') {
+    //         $trip->completed_at = now();
+    //     }
+    //     $trip->save();
+
+    //     return response()->json(['message' => 'Trip confirmed by driver.']);
+    // }
+
+
+
+
+
+    // public function updateStoreTime(Request $request)
+    // {
+    //     $request->validate([
+    //         'trip_id' => 'required|exists:trips,id',
+    //         'store_id' => 'required|exists:stores,id',
+    //         'arrival_time' => 'nullable|date',
+    //         'load_time' => 'nullable|date',
+    //         'departure_time' => 'nullable|date',
+    //     ]);
+
+    //     Trip::findOrFail($request->trip_id)
+    //         ->stores()
+    //         ->updateExistingPivot($request->store_id, [
+    //             'arrival_time' => $request->arrival_time,
+    //             'load_time' => $request->load_time,
+    //             'departure_time' => $request->departure_time,
+    //         ]);
+
+    //     return back()->withSuccess('Store timings updated.');
+    // }
+
+    // public function complete($id)
+    // {
+    //     $trip = Trip::findOrFail($id);
+    //     $trip->update([
+    //         'completed_at' => now(),
+    //         'admin_status' => 'completed',
+    //     ]);
+
+    //     return back()->withSuccess('Trip marked as completed.');
+    // }
 
     public function destroy($id)
     {

@@ -1,13 +1,13 @@
-@extends('layouts.admin')
 
-@section('content')
+
+<?php $__env->startSection('content'); ?>
 <!-- start page title -->
 <div class="row">
     <div class="col-12">
         <div class="page-title-box">
             <div class="page-title-right">
                 <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="<?php echo e(route('admin.dashboard')); ?>">Home</a></li>
                     <li class="breadcrumb-item active">Trip List</li>
                 </ol>
             </div>
@@ -44,7 +44,7 @@
 
                     <div class="col-xl-3">
                         <div class="text-xl-end mt-xl-0 mt-2">
-                            <a href="{{ route('admin.trip.create') }}" class="btn btn-danger mb-2 me-2">
+                            <a href="<?php echo e(route('admin.trip.create')); ?>" class="btn btn-danger mb-2 me-2">
                                 <i class="mdi mdi-map-marker-path me-1"></i> Add Trip
                             </a>
                         </div>
@@ -52,7 +52,7 @@
                 </div>
 
                 <div class="row">
-                    <p class="text-muted font-14">@include('admin.include.messages')</p>
+                    <p class="text-muted font-14"><?php echo $__env->make('admin.include.messages', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?></p>
                 </div>
 
                 <div class="row">
@@ -62,9 +62,9 @@
         </div> <!-- end card -->
     </div><!-- end col -->
 </div><!-- end row -->
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
     var current_url = '';
     data_table(false);
@@ -95,7 +95,7 @@
         var skey = $('#s_key').val();
         var sstat = $('#s_stat').val();
         var sdate = $('#s_date').val();
-        var base_url = '{{ route("admin.trips") }}';
+        var base_url = '<?php echo e(route("admin.trips")); ?>';
         if (page_url) {
             base_url = page_url;
             current_url = page_url;
@@ -109,7 +109,7 @@
                 skey: skey,
                 sstat: sstat,
                 sdate: sdate,
-                "_token": "{{ csrf_token() }}"
+                "_token": "<?php echo e(csrf_token()); ?>"
             },
             success: function(resp) {
                 $('#data_table').html(resp);
@@ -126,4 +126,6 @@
             event.preventDefault();
     }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.admin', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\logisticsApp\resources\views/admin/trip/header.blade.php ENDPATH**/ ?>
